@@ -1,0 +1,20 @@
+# IntelliJ - ignora en cualquier nivel
+**/.idea/
+**/*.iml
+
+# Maven
+**/target/
+
+# Node (para el frontend futuro)
+**/node_modules/
+**/.next/
+**/dist/
+**/build/
+
+# Variables de entorno
+**/.env
+**/.env.local
+
+# OS
+.DS_Store
+Thumbs.db
