@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "authUser")
+@Table(name = "auth_user")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,5 +29,5 @@ public class AuthUser {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user", unique = true, nullable = false)
-    private User user;
+    private Users user;
 }
