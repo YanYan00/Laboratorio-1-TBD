@@ -25,19 +25,23 @@ CREATE TABLE IF NOT EXISTS auth_user (
     CONSTRAINT fk_auth_user FOREIGN KEY (id_user) REFERENCES "user"(id_user)
 );
 
--- 4. Tabla de Productos
+
+-- 4. Tabla de Categorías
+CREATE TABLE IF NOT EXISTS categories (
+    id_category SERIAL PRIMARY KEY
+);
+
+
+-- 5. Tabla de Productos
 CREATE TABLE IF NOT EXISTS products (
     id_product SERIAL PRIMARY KEY,
     product_name VARCHAR(30) NOT NULL,
     product_description VARCHAR(125) NOT NULL,
     product_price DOUBLE PRECISION NOT NULL,
-    stock DOUBLE PRECISION NOT NULL
+    stock DOUBLE PRECISION NOT NULL,
+    id_category
     );
 
--- 5. Tabla de Categorías
-CREATE TABLE IF NOT EXISTS categories (
-    id_category SERIAL PRIMARY KEY
-);
 
 -- 6. Tabla de Carrito de Compras
 CREATE TABLE IF NOT EXISTS shooping_cart (
