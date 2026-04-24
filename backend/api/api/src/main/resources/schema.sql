@@ -36,22 +36,40 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- 5. Tabla de Categorías
 CREATE TABLE IF NOT EXISTS categories (
-    id_category SERIAL PRIMARY KEY
+    id_category SERIAL PRIMARY KEY,
+    category_name VARCHAR(30) NOT NULL,
+    category_description VARCHAR(125) NOT NULL
 );
 
 -- 6. Tabla de Carrito de Compras
 CREATE TABLE IF NOT EXISTS shooping_cart (
     id_shopping_cart SERIAL PRIMARY KEY
+    id_user VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE
 );
 
 -- 7. Tabla de Detalle de Carrito
 CREATE TABLE IF NOT EXISTS cart_detail (
     id_detail SERIAL PRIMARY KEY,
-    amount_of_product DOUBLE PRECISION
-);
+    id_shopping_cart INTEGER NOT NULL,
+    id_product INTEGER NOT NULL,
+    amount_of_product DOUBLE PRECISION,
 
+
+);
+CREATE TABLE IF NOT EXISTS cart_detail (
+id_detail SERIAL PRIMARY KEY,
+quantity DOUBLE PRECISION NOT NULL,
+FOREIGN KEY (id_shopping_cart) REFERENCES shopping_cart(id_shopping_cart),
+    FOREIGN KEY (id_product) REFERENCES products(id_product)
+    );
 -- 8. Tabla de Historial de Stock
 CREATE TABLE IF NOT EXISTS historial_stock (
     id_historial SERIAL PRIMARY KEY,
-    amount_modificated DOUBLE PRECISION NOT NULL
+    id_user INTEGER NOT NULL,
+    id_product INTEGER NOT NULL,
+    amount_modificated DOUBLE PRECISION NOT NULL,
+    FOREIGN KEY (id_product) REFERENCES products(id_product),
+    FOREIGN KEY (id_user) REFERENCES users(id_user)
+
 );
