@@ -41,13 +41,10 @@ CREATE TABLE IF NOT EXISTS products (
     product_name VARCHAR(30) NOT NULL,
     product_description VARCHAR(125) NOT NULL,
     product_price DOUBLE PRECISION NOT NULL,
-<<<<<<< HEAD
     stock DOUBLE PRECISION NOT NULL
     FOREIGN KEY (id_category) REFERENCES categories(id_category)
-=======
     stock DOUBLE PRECISION NOT NULL,
     id_category INTEGER
->>>>>>> b8710c8 (Add register for users)
     );
 
 
@@ -74,7 +71,6 @@ CREATE TABLE IF NOT EXISTS cart_detail (
 -- 8. Tabla de Historial de Stock
 CREATE TABLE IF NOT EXISTS historial_stock (
     id_historial SERIAL PRIMARY KEY,
-<<<<<<< HEAD
     id_user INTEGER NOT NULL,
     id_product INTEGER NOT NULL,
     amount_modificated DOUBLE PRECISION NOT NULL,
@@ -82,12 +78,8 @@ CREATE TABLE IF NOT EXISTS historial_stock (
     FOREIGN KEY (id_user) REFERENCES users(id_user)
 
 );
-=======
-    amount_modificated DOUBLE PRECISION NOT NULL
-);
 INSERT INTO roles (id_role, name_role) VALUES (1, 'ADMIN')
     ON CONFLICT (id_role) DO NOTHING;
 
 INSERT INTO roles (id_role, name_role) VALUES (2, 'USER')
     ON CONFLICT (id_role) DO NOTHING;
->>>>>>> b8710c8 (Add register for users)
