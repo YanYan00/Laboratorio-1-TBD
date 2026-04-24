@@ -1,19 +1,28 @@
 package com.ecommerce.api.controllers;
 
+import com.ecommerce.api.dto.RegisterDTO;
+import com.ecommerce.api.services.AuthUserServices;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
-
 @RestController
-@RequestMapping
+@RequestMapping("/api/auth")
 public class AuthUserController {
+    @Autowired
+    private AuthUserServices authUserServices;
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody RegisterDTO user) {
-        String response = userService.createUser(user);
-        return ResponseEntity.created(new URI("/api/users/register")).body(response);
+    public ResponseEntity<?> register(@RequestBody RegisterDTO user) {
+        try {
+            String response = authUserServices.createUser(user);
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

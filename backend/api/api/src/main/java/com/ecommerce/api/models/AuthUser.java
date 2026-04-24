@@ -1,4 +1,4 @@
-package com.ecommerce.api.entities;
+package com.ecommerce.api.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +17,4 @@ public class AuthUser {
     private String password;
 
     private String email;
-
-    private Long id_user;
 }

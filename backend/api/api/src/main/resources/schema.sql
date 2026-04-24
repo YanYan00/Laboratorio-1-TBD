@@ -1,28 +1,31 @@
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS auth_user CASCADE;
+DROP TABLE IF EXISTS roles CASCADE;
 -- 1. Tabla de Roles (necesaria primero para la clave foránea en User)
-CREATE TABLE IF NOT EXISTS role (
+CREATE TABLE IF NOT EXISTS roles (
     id_role SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE
+    name_role VARCHAR(255) NOT NULL UNIQUE
 );
 
 -- 2. Tabla de Usuarios
 CREATE TABLE IF NOT EXISTS users (
-    id_user VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    id_user SERIAL PRIMARY KEY,
+    name_user VARCHAR(255) NOT NULL,
     rut VARCHAR(25) NOT NULL UNIQUE,
     address VARCHAR(255) NOT NULL,
     phone VARCHAR(255) NOT NULL,
     id_role INTEGER NOT NULL,
-    CONSTRAINT fk_user_role FOREIGN KEY (id_role) REFERENCES role(id_role)
+    id_auth INTEGER NOT NULL,
+    CONSTRAINT fk_user_role FOREIGN KEY (id_role) REFERENCES roles(id_role),
+    CONSTRAINT fk_auth_user FOREIGN KEY (id_user) REFERENCES users(id_user)
 );
 
 -- 3. Tabla de Autenticación (Relación 1:1 con User)
 CREATE TABLE IF NOT EXISTS auth_user (
     id_auth SERIAL PRIMARY KEY,
     username VARCHAR(30) NOT NULL UNIQUE,
-    password VARCHAR(10) NOT NULL,
-    email VARCHAR(50) NOT NULL UNIQUE,
-    id_user VARCHAR(255) NOT NULL UNIQUE,
-    CONSTRAINT fk_auth_user FOREIGN KEY (id_user) REFERENCES "user"(id_user)
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- 5. Tabla de Categorías
@@ -38,8 +41,13 @@ CREATE TABLE IF NOT EXISTS products (
     product_name VARCHAR(30) NOT NULL,
     product_description VARCHAR(125) NOT NULL,
     product_price DOUBLE PRECISION NOT NULL,
+<<<<<<< HEAD
     stock DOUBLE PRECISION NOT NULL
     FOREIGN KEY (id_category) REFERENCES categories(id_category)
+=======
+    stock DOUBLE PRECISION NOT NULL,
+    id_category INTEGER
+>>>>>>> b8710c8 (Add register for users)
     );
 
 
@@ -66,6 +74,7 @@ CREATE TABLE IF NOT EXISTS cart_detail (
 -- 8. Tabla de Historial de Stock
 CREATE TABLE IF NOT EXISTS historial_stock (
     id_historial SERIAL PRIMARY KEY,
+<<<<<<< HEAD
     id_user INTEGER NOT NULL,
     id_product INTEGER NOT NULL,
     amount_modificated DOUBLE PRECISION NOT NULL,
@@ -73,3 +82,12 @@ CREATE TABLE IF NOT EXISTS historial_stock (
     FOREIGN KEY (id_user) REFERENCES users(id_user)
 
 );
+=======
+    amount_modificated DOUBLE PRECISION NOT NULL
+);
+INSERT INTO roles (id_role, name_role) VALUES (1, 'ADMIN')
+    ON CONFLICT (id_role) DO NOTHING;
+
+INSERT INTO roles (id_role, name_role) VALUES (2, 'USER')
+    ON CONFLICT (id_role) DO NOTHING;
+>>>>>>> b8710c8 (Add register for users)

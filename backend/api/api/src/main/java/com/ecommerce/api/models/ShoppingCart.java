@@ -1,4 +1,4 @@
-package com.ecommerce.api.entities;
+package com.ecommerce.api.models;
 
 
 import lombok.AllArgsConstructor;
