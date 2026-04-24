@@ -12,5 +12,12 @@ public class HistorialStock {
 
     private Long id_historial;
 
+
     private double amountModificated;
+
+    private Long id_user;
+
+    private  Long id_product;
+
+
 }

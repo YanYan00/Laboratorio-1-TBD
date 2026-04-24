@@ -10,5 +10,11 @@ import lombok.NoArgsConstructor;
 
 public class Category {
 
-    private Long id_category;  
+    private Long id_category;
+
+    private String category_name;
+
+    private String category_description;
+
+
 }
