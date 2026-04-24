@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS auth_user (
 );
 
 -- 4. Tabla de Productos
--- falta el SKU (codigo unico del producto =/ a pk)
 CREATE TABLE IF NOT EXISTS products (
     id_product SERIAL PRIMARY KEY,
     product_name VARCHAR(30) NOT NULL,
@@ -37,36 +36,22 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- 5. Tabla de Categorías
 CREATE TABLE IF NOT EXISTS categories (
-    id_category SERIAL PRIMARY KEY,
-    category_name VARCHAR(30) NOT NULL,
-    category_description VARCHAR(125) NOT NULL
+    id_category SERIAL PRIMARY KEY
 );
 
 -- 6. Tabla de Carrito de Compras
-CREATE TABLE IF NOT EXISTS shopping_cart (
-    id_shopping_cart SERIAL PRIMARY KEY,
-    id_user VARCHAR(255) NOT NULL,
-    CONSTRAINT fk_cart_user FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE
-    );
+CREATE TABLE IF NOT EXISTS shooping_cart (
+    id_shopping_cart SERIAL PRIMARY KEY
+);
 
 -- 7. Tabla de Detalle de Carrito
 CREATE TABLE IF NOT EXISTS cart_detail (
     id_detail SERIAL PRIMARY KEY,
-    id_shopping_cart INTEGER NOT NULL,
-    id_product INTEGER NOT NULL,
-    amount_of_product DOUBLE PRECISION,
-    FOREIGN KEY (id_shopping_cart) REFERENCES shopping_cart(id_shopping_cart),
-    FOREIGN KEY (id_product) REFERENCES products(id_product)
-
+    amount_of_product DOUBLE PRECISION
 );
-
 
 -- 8. Tabla de Historial de Stock
 CREATE TABLE IF NOT EXISTS historial_stock (
     id_historial SERIAL PRIMARY KEY,
-    id_user INTEGER NOT NULL,
-    id_product INTegER NOT NULL,
-    amount_modificated DOUBLE PRECISION NOT NULL,
-    FOREIGN KEY (id_user) REFERENCES users(id_user),
-    FOREIGN KEY (id_product) REFERENCES products(id_product)
+    amount_modificated DOUBLE PRECISION NOT NULL
 );
