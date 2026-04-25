@@ -30,14 +30,15 @@ CREATE TABLE IF NOT EXISTS auth_user (
 
 -- 5. Tabla de Categorías
 CREATE TABLE IF NOT EXISTS categories (
-    id_category SERIAL PRIMARYz KEY,
-    category_name VARCHAR(30) NOT NULL,
+    id_category SERIAL PRIMARY KEY,
+     category_name VARCHAR(30) NOT NULL,
     category_description VARCHAR(125) NOT NULL
     );
 -- 4. Tabla de Productos
 CREATE TABLE IF NOT EXISTS products (
     id_product SERIAL PRIMARY KEY,
     id_categoty INTEGER NOT NULL,
+    SKU_product INTEGER NOT NULL,
     product_name VARCHAR(30) NOT NULL,
     product_description VARCHAR(125) NOT NULL,
     product_price DOUBLE PRECISION NOT NULL,

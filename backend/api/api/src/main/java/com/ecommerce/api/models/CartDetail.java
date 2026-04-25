@@ -12,12 +12,11 @@ public class CartDetail{
 
     private Long id_detail;
 
-    private double amountOfProduct;
-
     private Long id_shopping_cart;
 
     private Long id_product;
 
+    private double quantity;
 
 
 }

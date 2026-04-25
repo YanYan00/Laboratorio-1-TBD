@@ -12,7 +12,10 @@ public class ProductDTO {
 
     private double productPrice;
 
+
     private double stock;
 
     private Long id_category;
+
+    private Long skuProduct;
 }

@@ -18,6 +18,8 @@ public class Product {
 
     private double productPrice;
 
+    private Long SKUProduct;
+
     private double stock;
 
     private Long id_category;
