@@ -23,6 +23,10 @@ public class ProductService {
             return "Error: El precio de publicacion debe ser mayor a 0";
         }
 
+        if(productToPublish.getId_user() == null){
+            return "Error: El producto debe estar asociado a un usuario";
+        }
+        
         int saved = productRepository.saveProduct(productToPublish);
         
         return saved > 0 ? "Producto publicado" : "Error al publicar";
