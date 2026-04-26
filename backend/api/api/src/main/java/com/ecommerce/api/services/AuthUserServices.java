@@ -1,15 +1,22 @@
 package com.ecommerce.api.services;
 
+import com.ecommerce.api.config.JwtUtils;
+import com.ecommerce.api.dto.LoginDTO;
 import com.ecommerce.api.dto.RegisterDTO;
+import com.ecommerce.api.models.AuthUser;
 import com.ecommerce.api.repositories.AuthUserRepository;
-import com.ecommerce.api.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthUserServices {
     @Autowired
     private AuthUserRepository authUserRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtils jwtUtils;
 
     public String createUser(RegisterDTO user){
         if (user.getPassword().length() < 8) {
@@ -27,10 +34,24 @@ public class AuthUserServices {
         if(authUserRepository.existsByUsername(user.getUsername())){
             throw new RuntimeException("Este username ya esta registrado");
         }
-
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashedPassword);
         Long newUserId= authUserRepository.saveUserAuth(user);
         authUserRepository.saveUserInfo(user,newUserId);
 
         return "Usuario registrado con exito";
+    }
+
+    public String loginUser(LoginDTO login){
+        AuthUser user = authUserRepository.findByIdentifier(login.getIdentifier());
+        if (user == null){
+            throw new RuntimeException("Credenciales invalidas");
+        }
+        if(passwordEncoder.matches(login.getPassword(),user.getPassword())){
+            return jwtUtils.generateToken(user);
+        }
+        else {
+            throw new RuntimeException("Contrasena incorrecta");
+        }
     }
 }

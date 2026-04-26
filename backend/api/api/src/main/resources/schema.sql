@@ -37,22 +37,20 @@ CREATE TABLE IF NOT EXISTS categories (
 -- 4. Tabla de Productos
 CREATE TABLE IF NOT EXISTS products (
     id_product SERIAL PRIMARY KEY,
-    id_categoty INTEGER NOT NULL,
+    id_category INTEGER NOT NULL,
     SKU_product INTEGER NOT NULL,
     product_name VARCHAR(30) NOT NULL,
     product_description VARCHAR(125) NOT NULL,
     product_price DOUBLE PRECISION NOT NULL,
-    stock DOUBLE PRECISION NOT NULL
-    FOREIGN KEY (id_category) REFERENCES categories(id_category)
     stock DOUBLE PRECISION NOT NULL,
-    id_category INTEGER
+    FOREIGN KEY (id_category) REFERENCES categories(id_category)
     );
 
 
 
 -- 6. Tabla de Carrito de Compras
-CREATE TABLE IF NOT EXISTS shooping_cart (
-    id_shopping_cart SERIAL PRIMARY KEY
+CREATE TABLE IF NOT EXISTS shopping_cart (
+    id_shopping_cart SERIAL PRIMARY KEY,
     id_user INTEGER NOT NULL,
     FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE
 );

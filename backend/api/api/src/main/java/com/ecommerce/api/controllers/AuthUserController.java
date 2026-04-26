@@ -1,6 +1,8 @@
 package com.ecommerce.api.controllers;
 
+import com.ecommerce.api.dto.LoginDTO;
 import com.ecommerce.api.dto.RegisterDTO;
+import com.ecommerce.api.models.AuthUser;
 import com.ecommerce.api.services.AuthUserServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,16 @@ public class AuthUserController {
             return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginDTO login){
+        try {
+            String response = authUserServices.loginUser(login);
+            return ResponseEntity.ok(response);
+        }
+        catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

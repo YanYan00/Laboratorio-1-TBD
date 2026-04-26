@@ -1,6 +1,7 @@
 package com.ecommerce.api.repositories;
 
 import com.ecommerce.api.dto.RegisterDTO;
+import com.ecommerce.api.models.AuthUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -52,5 +53,20 @@ public class AuthUserRepository {
                 role,
                 id_auth
         );
+    }
+    public AuthUser findByIdentifier(String identifier) {
+        String sql = "SELECT id_auth, email, username, password FROM auth_user WHERE username = ? OR email = ?";
+
+        return jdbcTemplate.query(sql, rs -> {
+            if (rs.next()) {
+                AuthUser user = new AuthUser();
+                user.setId_auth(rs.getLong("id_auth"));
+                user.setEmail(rs.getString("email"));
+                user.setUsername(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                return user;
+            }
+            return null;
+        }, identifier, identifier);
     }
 }
