@@ -1,6 +1,8 @@
 package com.ecommerce.api.repositories;
 
 import com.ecommerce.api.models.Users;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -11,12 +13,8 @@ import java.util.Optional;
 @Repository
 public class UsersRepository {
 
+    @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    public UsersRepository (JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
 
     // function for mapping
     private final RowMapper<Users> usersRowMapper = (rs, rowNum) -> new Users(

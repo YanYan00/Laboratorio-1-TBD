@@ -12,12 +12,9 @@ import java.util.Optional;
 @Repository
 public class CartDetailRepository {
 
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
-
-    public CartDetailRepository (JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-    }
     // function for mapping columns
 
     private final RowMapper<CartDetail> cartDetailRowMapper = (rs, rowNum) -> new CartDetail(

@@ -1,6 +1,8 @@
 package com.ecommerce.api.repositories;
 
 import com.ecommerce.api.models.HistorialStock;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -10,11 +12,9 @@ import java.util.Optional;
 
 @Repository
 public class HistorialStockRepository {
-    private JdbcTemplate jdbcTemplate;
 
-    public HistorialStockRepository (JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     // function for mapping columns
     private final RowMapper<HistorialStock> historialStockRowMapper = (rs, rowNum) -> new HistorialStock(
@@ -66,7 +66,7 @@ public class HistorialStockRepository {
                     id_user = ?,
                     id_product = ?,
                     amount_modificated = ?
-                WHERE historial_stock = ?
+                WHERE id_historial = ?
                 """;
         return jdbcTemplate.update(sql,
                 historialStock.getId_user(),

@@ -1,6 +1,7 @@
 package com.ecommerce.api.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,7 +24,13 @@ public class ProductController {
     }
 
     @PostMapping("/publish")
-    private String publishAProduct(@RequestBody ProductDTO productToPublish){
-        return productService.publishProduct(productToPublish);
+    public ResponseEntity<?> publishAProduct(@RequestBody ProductDTO productToPublish){
+        
+        String response = productService.publishProduct(productToPublish);
+        
+        if(response.contains("Error")){
+            return ResponseEntity.badRequest().body(response); 
+        }
+        return ResponseEntity.ok(response);
     }
 }

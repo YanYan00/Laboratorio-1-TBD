@@ -1,6 +1,8 @@
 package com.ecommerce.api.repositories;
 
 import com.ecommerce.api.models.Role;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -10,11 +12,9 @@ import java.util.Optional;
 
 @Repository
 public class RoleRepository {
-    private JdbcTemplate jdbcTemplate;
 
-    public RoleRepository (JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     //function for mapping columns
 

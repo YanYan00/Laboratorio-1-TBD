@@ -9,16 +9,13 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
+
 
 @Repository
 public class AuthUserRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public AuthUserRepository (JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-    }
     public boolean existsByUsername(String username){
         String sql = "SELECT COUNT(*) FROM auth_user WHERE username = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, username);

@@ -18,9 +18,6 @@ public class ProductRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public ProductRepository (JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-    }
     // function for mapping columns
     private final RowMapper<Product> productRowMapper = (rs, rowNum) -> new Product(
             rs.getLong("id_product"),
@@ -29,13 +26,14 @@ public class ProductRepository {
             rs.getDouble("product_price"),
             rs.getLong("SKU_product"),
             rs.getDouble("stock"),
-            rs.getLong("id_category")
+            rs.getLong("id_category"),
+            rs.getLong("id_user")
     );
     // create
     public int saveProduct(ProductDTO product) {
         String sql = """
-        INSERT INTO products (id_category, SKU_product, product_name, product_description, product_price, stock)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO products (id_category, SKU_product, product_name, product_description, product_price, stock, id_user)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """;
         return jdbcTemplate.update(sql,
                 product.getId_category(),
@@ -43,7 +41,8 @@ public class ProductRepository {
                 product.getProductName(),
                 product.getProductDescription(),
                 product.getProductPrice(),
-                product.getStock()
+                product.getStock(),
+                product.getId_user()
         );
     }
     //read
@@ -53,14 +52,14 @@ public class ProductRepository {
     }
     //read
     public Optional<Product> findById(Long id) {
-        String sql = "SELECT * FROM product WHERE id_products = ?";
+        String sql = "SELECT * FROM products WHERE id_product = ?";
         return jdbcTemplate.query(sql, productRowMapper, id)
                 .stream()
                 .findFirst();
     }
     // delete
     public int deleteById(Long id) {
-        String sql = "DELETE FROM product WHERE id_products = ?";
+        String sql = "DELETE FROM products WHERE id_product = ?";
         return jdbcTemplate.update(sql, id);
 
     }

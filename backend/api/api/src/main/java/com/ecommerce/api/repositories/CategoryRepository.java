@@ -15,10 +15,6 @@ public class CategoryRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public CategoryRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
 
     private final RowMapper<Category> categoryRowMapper = (rs, rowNum) -> new Category(
             rs.getLong("id_category"),

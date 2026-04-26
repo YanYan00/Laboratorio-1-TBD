@@ -38,12 +38,14 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE TABLE IF NOT EXISTS products (
     id_product SERIAL PRIMARY KEY,
     id_category INTEGER NOT NULL,
+    id_user INTEGER NOT NULL,
     SKU_product INTEGER NOT NULL,
     product_name VARCHAR(30) NOT NULL,
     product_description VARCHAR(125) NOT NULL,
     product_price DOUBLE PRECISION NOT NULL,
     stock DOUBLE PRECISION NOT NULL,
-    FOREIGN KEY (id_category) REFERENCES categories(id_category)
+    FOREIGN KEY (id_category) REFERENCES categories(id_category),
+    FOREIGN KEY (id_user) REFERENCES users(id_user)
     );
 
 

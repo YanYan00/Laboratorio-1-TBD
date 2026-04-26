@@ -23,4 +23,6 @@ public class Product {
     private double stock;
 
     private Long id_category;
+
+    private Long id_user;
 }
