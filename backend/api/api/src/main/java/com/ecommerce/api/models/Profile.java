@@ -7,16 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-public class AuthUser {
-
-    private Long id_auth;
-
+public class Profile {
     private String username;
-
-    private String password;
-
     private String email;
-
-    private String roleName;
+    private String name;
+    private String rut;
+    private String address;
+    private String phone;
 }

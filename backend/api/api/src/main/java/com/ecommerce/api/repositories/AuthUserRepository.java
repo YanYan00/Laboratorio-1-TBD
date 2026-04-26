@@ -30,33 +30,32 @@ public class AuthUserRepository {
         return count != null && count > 0;
     }
     public Long saveUserAuth(RegisterDTO register) {
-        String sql = "INSERT INTO auth_user (username, password, email) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO auth_user (username, password, email,id_role) VALUES (?, ?, ?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
+        int role = 2;
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id_auth"});
             ps.setString(1, register.getUsername());
             ps.setString(2, register.getPassword());
             ps.setString(3, register.getEmail());
+            ps.setInt(4, role);
             return ps;
         }, keyHolder);
         return keyHolder.getKey().longValue();
     }
     public int saveUserInfo(RegisterDTO register, Long id_auth) {
-        int role = 2;
-        String sql = "INSERT INTO users (name_user, rut, address, phone, id_role, id_auth) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (name_user, rut, address, phone,  id_auth) VALUES (?, ?, ?, ?, ?)";
         return jdbcTemplate.update(
                 sql,
                 register.getName_user(),
                 register.getRut(),
                 register.getAddress(),
                 register.getPhone(),
-                role,
                 id_auth
         );
     }
     public AuthUser findByIdentifier(String identifier) {
-        String sql = "SELECT id_auth, email, username, password FROM auth_user WHERE username = ? OR email = ?";
-
+        String sql = "SELECT a.id_auth, a.email, a.username, a.password, r.name_role FROM auth_user a INNER JOIN roles r ON a.id_role = r.id_role WHERE a.username = ? OR a.email = ?";
         return jdbcTemplate.query(sql, rs -> {
             if (rs.next()) {
                 AuthUser user = new AuthUser();
@@ -64,6 +63,7 @@ public class AuthUserRepository {
                 user.setEmail(rs.getString("email"));
                 user.setUsername(rs.getString("username"));
                 user.setPassword(rs.getString("password"));
+                user.setRoleName(rs.getString("name_role"));
                 return user;
             }
             return null;

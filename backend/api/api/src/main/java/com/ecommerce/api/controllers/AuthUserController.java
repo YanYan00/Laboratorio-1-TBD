@@ -20,7 +20,6 @@ public class AuthUserController {
     public ResponseEntity<?> register(@RequestBody RegisterDTO user) {
         try {
             String response = authUserServices.createUser(user);
-
             return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) {

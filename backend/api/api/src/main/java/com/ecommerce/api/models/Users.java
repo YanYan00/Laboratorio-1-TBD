@@ -18,8 +18,6 @@ public class Users{
     private String address;
     
     private String phone;
-  
-    private Long id_role;
 
     private Long id_auth;
 }

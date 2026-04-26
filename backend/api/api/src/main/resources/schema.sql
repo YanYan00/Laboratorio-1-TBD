@@ -14,9 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     rut VARCHAR(25) NOT NULL UNIQUE,
     address VARCHAR(255) NOT NULL,
     phone VARCHAR(255) NOT NULL,
-    id_role INTEGER NOT NULL,
     id_auth INTEGER NOT NULL,
-    CONSTRAINT fk_user_role FOREIGN KEY (id_role) REFERENCES roles(id_role),
     CONSTRAINT fk_auth_user FOREIGN KEY (id_user) REFERENCES users(id_user)
 );
 
@@ -25,7 +23,9 @@ CREATE TABLE IF NOT EXISTS auth_user (
     id_auth SERIAL PRIMARY KEY,
     username VARCHAR(30) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE
+    email VARCHAR(100) NOT NULL UNIQUE,
+    id_role INTEGER NOT NULL,
+    CONSTRAINT fk_user_role FOREIGN KEY (id_role) REFERENCES roles(id_role)
 );
 
 -- 5. Tabla de Categorías
@@ -82,3 +82,6 @@ INSERT INTO roles (id_role, name_role) VALUES (1, 'ADMIN')
 
 INSERT INTO roles (id_role, name_role) VALUES (2, 'USER')
     ON CONFLICT (id_role) DO NOTHING;
+
+INSERT INTO auth_user(username,password,email,id_role) VALUES ('jean.rojas','$2a$12$sd7EFCu9wX4vdDIgmWD0zeiOOREXg862ycfUvnxRfZTf1W1yzfNNC','jean.rojas@mail.com',1);
+INSERT INTO users(name_user,rut,address,phone,id_auth) VALUES ('Jean Rojas','12345678-1','Av.Portugal','23242442',1);
