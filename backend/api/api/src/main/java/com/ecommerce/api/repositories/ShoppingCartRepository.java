@@ -5,8 +5,11 @@ import com.ecommerce.api.models.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,6 +68,29 @@ public class ShoppingCartRepository {
         return jdbcTemplate.update(sql,
                 shoppingCart.getId_user(),
                 id);
+    }
+
+    public Optional<ShoppingCart> findByUserId(Long id_user){
+
+        String sql = "SELECT * FROM shopping_cart WHERE id_user = ?";
+
+        return jdbcTemplate.query(sql, shoppingCartRowMapper, id_user).stream().findFirst();
+    }
+
+    public Long createCartAndReturnId(Long id_user){
+        
+        String sql = "INSERT INTO shopping_cart (id_user) VALUES (?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id_shopping_cart"});
+            ps.setLong(1, id_user);
+            return ps;
+        }, keyHolder);
+
+        return keyHolder.getKey().longValue();
     }
 
 }
