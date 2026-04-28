@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS cart_detail (
     id_shopping_cart INTEGER NOT NULL,
     id_product INTEGER NOT NULL,
     quantity DOUBLE PRECISION,
+    purchase_date DATE,
     FOREIGN KEY (id_shopping_cart) REFERENCES shopping_cart(id_shopping_cart),
     FOREIGN KEY (id_product) REFERENCES products(id_product)
 

@@ -21,7 +21,8 @@ public class CartDetailRepository {
             rs.getLong("id_detail"),
             rs.getLong("id_shopping_cart"),
             rs.getLong("id_product"),
-            rs.getDouble("quantity")
+            rs.getDouble("quantity"),
+            rs.getDate("purchase_date")
     );
 
     // crate
