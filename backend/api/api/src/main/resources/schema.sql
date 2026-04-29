@@ -7,18 +7,9 @@ CREATE TABLE IF NOT EXISTS roles (
     name_role VARCHAR(255) NOT NULL UNIQUE
 );
 
--- 2. Tabla de Usuarios
-CREATE TABLE IF NOT EXISTS users (
-    id_user SERIAL PRIMARY KEY,
-    name_user VARCHAR(255) NOT NULL,
-    rut VARCHAR(25) NOT NULL UNIQUE,
-    address VARCHAR(255) NOT NULL,
-    phone VARCHAR(255) NOT NULL,
-    id_auth INTEGER NOT NULL,
-    CONSTRAINT fk_auth_user FOREIGN KEY (id_user) REFERENCES users(id_user)
-);
 
--- 3. Tabla de Autenticación (Relación 1:1 con User)
+
+-- 2. Tabla de Autenticación (Relación 1:1 con User)
 CREATE TABLE IF NOT EXISTS auth_user (
     id_auth SERIAL PRIMARY KEY,
     username VARCHAR(30) NOT NULL UNIQUE,
@@ -27,7 +18,16 @@ CREATE TABLE IF NOT EXISTS auth_user (
     id_role INTEGER NOT NULL,
     CONSTRAINT fk_user_role FOREIGN KEY (id_role) REFERENCES roles(id_role)
 );
-
+-- 3. Tabla de Usuarios
+CREATE TABLE IF NOT EXISTS users (
+    id_user SERIAL PRIMARY KEY,
+    name_user VARCHAR(255) NOT NULL,
+    rut VARCHAR(25) NOT NULL UNIQUE,
+    address VARCHAR(255) NOT NULL,
+    phone VARCHAR(255) NOT NULL,
+    id_auth INTEGER NOT NULL,
+    CONSTRAINT fk_auth_user FOREIGN KEY (id_auth) REFERENCES auth_user(id_auth)
+    );
 -- 5. Tabla de Categorías
 CREATE TABLE IF NOT EXISTS categories (
     id_category SERIAL PRIMARY KEY,
@@ -80,6 +80,53 @@ CREATE TABLE IF NOT EXISTS historial_stock (
     FOREIGN KEY (id_user) REFERENCES users(id_user)
 
 );
+
+CREATE TABLE IF NOT EXISTS payments (
+    id_payment SERIAL PRIMARY KEY,
+    id_user INTEGER NOT NULL,
+    total DOUBLE PRECISION NOT NULL,
+    payment_date TIMESTAMP NOT NULL DEFAULT NOW(),
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    -- 'PENDING' | 'APPROVED' | 'CANCELLED'
+    FOREIGN KEY (id_user) REFERENCES users(id_user)
+);
+
+CREATE TABLE IF NOT EXISTS detail_payment (
+    id_detail_payment SERIAL PRIMARY KEY,
+    id_payment INTEGER NOT NULL,
+    id_product INTEGER NOT NULL,
+    quantity DOUBLE PRECISION NOT NULL,
+    unit_price DOUBLE PRECISION NOT NULL,   -- snapshot del precio al momento de compra
+    subtotal DOUBLE PRECISION NOT NULL,   -- quantity * unit_price (desnormalizado intencionalmente)
+    FOREIGN KEY (id_payment) REFERENCES payments(id_payment),
+    FOREIGN KEY (id_product) REFERENCES products(id_product)
+    );
+
+'''
+CREATE OR REPLACE PROCEDURE  checkout_car(
+    p_id_user INT
+)LANGUAGE plpgpsl
+DECLARE
+    v_id_shopping_cart INT
+BEGIN
+    v_id_shopping_cart = SELECT id_shopping_cart FROM shopping_cart s WHERE p_id_user = s.id_user;
+DECLARE
+    v_item RECORD;
+    v_total DOUBLE PRECISION:=0;
+FOR v_item IN
+    SELECT cd.id_product, cd_cuantity, p.product_price
+    FROM cart_detail cd
+    JOIN products p ON p.id_product = cd.id_product
+    WHERE cd.id_shopping_cart = v_id_shopping_cart
+LOOP
+    v_subtotal := v_item.quantity * v_item.product_price;
+    v_total := v_total + v_subtotal
+    INSERT INTO detail_payments (id_payment,id_product,quantity,unit_price,subtotal) VALUES (,cd.id_product,cd_cuantity,p.product_price,v_subtotal);
+END LOOP
+'''
+
+
+
 INSERT INTO roles (id_role, name_role) VALUES (1, 'ADMIN')
     ON CONFLICT (id_role) DO NOTHING;
 
