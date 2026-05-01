@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
     address VARCHAR(255) NOT NULL,
     phone VARCHAR(255) NOT NULL,
     id_auth INTEGER NOT NULL,
+    last_purchase TIMESTAMP DEFAULT NULL,
     CONSTRAINT fk_auth_user FOREIGN KEY (id_auth) REFERENCES auth_user(id_auth)
     );
 -- 5. Tabla de Categorías
@@ -63,7 +64,7 @@ CREATE TABLE IF NOT EXISTS cart_detail (
     id_shopping_cart INTEGER NOT NULL,
     id_product INTEGER NOT NULL,
     quantity DOUBLE PRECISION,
-    purchase_date DATE,
+    purchase_date  TIMESTAMP NOT NULL,
     FOREIGN KEY (id_shopping_cart) REFERENCES shopping_cart(id_shopping_cart),
     FOREIGN KEY (id_product) REFERENCES products(id_product)
 
@@ -127,6 +128,26 @@ BEFORE INSERT ON detail_payment
 FOR EACH ROW 
 EXECUTE FUNCTION check_stock_before_order;
 
+--- Trigger para modificar el campo last_purchase
+
+CREATE OR REPLACE FUNVTION update_last_Purchase()
+        RETURN TRIGGER AS $$
+       BEGIN
+       IF NEW.status = 'APPROVED' THEN
+          UPDATE users
+              SET last_purchase = NEW.payment_date
+                WHERE id_user = NEW.id_user;
+        END IF;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- triger que se ejecutara al cambiar el status de pendiente a aprovado
+   CREATE TRIGGER trigger_last_purchase
+    AFTER UPDATE payments
+    FOR EACH ROW
+    EXECUTE FUNCTION update_last_Purchase;
 
 '''
 CREATE OR REPLACE PROCEDURE  checkout_cart(

@@ -22,8 +22,9 @@ public class CartDetailRepository {
             rs.getLong("id_shopping_cart"),
             rs.getLong("id_product"),
             rs.getDouble("quantity"),
-            rs.getDate("purchase_date")
+            rs.getTimestamp("purchase_date").toLocalDateTime()
     );
+
 
     // crate
     public  int saveCartDetail(CartDetail cartDetail){

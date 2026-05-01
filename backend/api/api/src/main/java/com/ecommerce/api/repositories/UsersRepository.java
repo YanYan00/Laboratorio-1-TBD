@@ -23,14 +23,26 @@ public class UsersRepository {
     }
 
     // function for mapping
-    private final RowMapper<Users> usersRowMapper = (rs, rowNum) -> new Users(
-            rs.getLong("id_user"),
-            rs.getString("name_user"),
-            rs.getString("rut"),
-            rs.getString("address"),
-            rs.getString("phone"),
-            rs.getLong("id_auth")
-    );
+  private final RowMapper<Users> usersRowMapper = (rs, rowNum) -> {
+        java.sql.Timestamp lastPurchaseTime = rs.getTimestamp("last_purchase");
+
+      java.time.LocalDateTime lastPurchase;
+      if (lastPurchaseTime != null){
+          lastPurchase = lastPurchaseTime.toLocalDateTime();
+      }else{
+          lastPurchase = null;
+      }
+      // make object user
+        return new Users(
+                rs.getLong("id_user"),
+                rs.getString("name_user"),
+                rs.getString("rut"),
+                rs.getString("address"),
+                rs.getString("phone"),
+                rs.getLong("id_auth"),
+                lastPurchase
+        );
+    };
 
     // CREATE
     public int save(Users user) {

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -20,6 +21,6 @@ public class CartDetail{
 
     private double quantity;
  
-    private Date purchase_date;
+    private LocalDateTime purchase_date;
 }
 
