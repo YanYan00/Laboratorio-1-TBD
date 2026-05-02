@@ -135,6 +135,15 @@ public class UsersRepository {
         }, username);
     }
 
-
+    // dashborad for myselft
+    public Long findIdByUsername(String username){
+        String sql = """
+                SELECT u.id_user
+                FROM users u
+                JOIN auth_user a ON u.id_auth = a.id_auth
+                WHERE a.username = ?
+                """;
+        return jdbcTemplate.queryForObject(sql,Long.class, username);
+    }
 
 }
