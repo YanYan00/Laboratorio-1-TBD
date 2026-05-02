@@ -161,7 +161,7 @@ CREATE MATERIALIZED VIEW  monthly_sales_by_product_category AS
        c.id_catergory,
        c.category_name,
        SUM(dp.quantity) AS total_product_sold,
-       SUM(dp.subtotal) AS total_sales_amount 
+       SUM(dp.subtotal) AS total_sales_amount
 
        FROM payments p
        JOIN detail_payment dp on dp.id_payment = p.id_payment
@@ -176,6 +176,7 @@ CREATE MATERIALIZED VIEW  monthly_sales_by_product_category AS
             c.Caategory_name
 
         order by month, total_sales_amount DESC;
+
 
 
 
