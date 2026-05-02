@@ -149,6 +149,40 @@ $$ LANGUAGE plpgsql;
     FOR EACH ROW
     EXECUTE FUNCTION update_last_Purchase;
 
+
+
+
+
+
+
+--- vista materializada de "ventas mensuales por categorias de productos"
+CREATE MATERIALIZED VIEW  monthly_sales_by_product_category AS
+       SELECT DATE_TRUNC('month',p.payment_date) AS month,
+       c.id_catergory,
+       c.category_name,
+       SUM(dp.quantity) AS total_product_sold,
+       SUM(dp.subtotal) AS total_sales_amount 
+
+       FROM payments p
+       JOIN detail_payment dp on dp.id_payment = p.id_payment
+        JOIN products pr ON dp.id_category = pr.id_category
+        JOIN categories c on pr.id_category = c.id_category
+
+        WHERE p.status = 'APPROVED'
+
+        GROUP BY
+            DATE_TRUNC('month', p.payment_date),
+            c.id_category,
+            c.Caategory_name
+
+        order by month, total_sales_amount DESC;
+
+
+
+
+
+
+
 '''
 CREATE OR REPLACE PROCEDURE  checkout_cart(
     p_id_user INT
