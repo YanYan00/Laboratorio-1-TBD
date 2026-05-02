@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS cart_detail (
     id_shopping_cart INTEGER NOT NULL,
     id_product INTEGER NOT NULL,
     quantity DOUBLE PRECISION,
+    purchase_date  TIMESTAMP NOT NULL,
     FOREIGN KEY (id_shopping_cart) REFERENCES shopping_cart(id_shopping_cart),
     FOREIGN KEY (id_product) REFERENCES products(id_product)
 
@@ -125,11 +126,11 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_stock
 BEFORE INSERT ON detail_payment
 FOR EACH ROW 
-EXECUTE FUNCTION check_stock_before_order();
+EXECUTE FUNCTION check_stock_before_order;
 
 --- Trigger para modificar el campo last_purchase
-/*
-CREATE OR REPLACE FUNCTION update_last_Purchase()
+
+CREATE OR REPLACE FUNVTION update_last_Purchase()
         RETURN TRIGGER AS $$
        BEGIN
        IF NEW.status = 'APPROVED' THEN
@@ -147,6 +148,9 @@ $$ LANGUAGE plpgsql;
     AFTER UPDATE payments
     FOR EACH ROW
     EXECUTE FUNCTION update_last_Purchase;
+
+
+
 
 
 
@@ -172,69 +176,36 @@ CREATE MATERIALIZED VIEW  monthly_sales_by_product_category AS
             c.Caategory_name
 
         order by month, total_sales_amount DESC;
-*/
 
 
 
 
 
 
+
+
+'''
 CREATE OR REPLACE PROCEDURE  checkout_cart(
     p_id_user INT
-)LANGUAGE plpgsql
-AS $$
+)LANGUAGE plpgpsl
 DECLARE
-    --Variables to usage in procedure
-    v_item RECORD;
-    v_total DOUBLE PRECISION :=0;
-    v_subtotal DOUBLE PRECISION;
-    v_id_payment INT;
-    v_id_shopping_cart  INT;
+    v_id_shopping_cart INT
 BEGIN
-    --Select cart of user
-    SELECT id_shopping_cart INTO v_id_shopping_cart
-    FROM shopping_cart
-    WHERE id_user = p_id_user;
-    FOR v_item IN
-        SELECT cd.id_product, cd.quantity, p.product_price
-        FROM cart_detail cd
-        JOIN products p ON p.id_product = cd.id_product
-        WHERE cd.id_shopping_cart = v_id_shopping_cart
-    Loop
-        v_subtotal := v_item.quantity * v_item.product_price;
-        v_total    := v_total + v_subtotal;
-    END LOOP;
-    --Insert general information of payment obtained in loop
-    INSERT INTO payments (id_user,total,payment_date,status)
-    VALUES (p_id_user,v_total, NOW(),'APPROVED')
-    --Take the payment
-    RETURNING id_payment INTO v_id_payment;
-    FOR v_item IN
-        SELECT cd.id_product,cd.quantity,p.product_price
-        FROM cart_detail cd
-        JOIN products p ON p.id_product = cd.id_product
-        WHERE cd.id_shopping_cart = v_id_shopping_cart
-    LOOP
-        v_subtotal := v_item.quantity * v_item.product_price;
-        --Insert payment detail before execute update products
-        INSERT INTO detail_payment(id_payment, id_product, quantity, unit_price, subtotal)
-        VALUES (v_id_payment,v_item.id_product,v_item.quantity,v_item.product_price,v_subtotal);
-        --Rest product quantity
-        UPDATE products
-        SET stock = stock - v_item.quantity
-        WHERE id_product = v_item.id_product;
-    END LOOP;
-    --Delete detail cart user
-    DELETE FROM cart_detail
-    WHERE id_shopping_cart = v_id_shopping_cart;
-    COMMIT;
-    EXCEPTION
-    WHEN OTHERS THEN
-    ROLLBACK;
-    RAISE;
-END;
-$$;
-
+    v_id_shopping_cart = SELECT id_shopping_cart FROM shopping_cart s WHERE p_id_user = s.id_user;
+DECLARE
+    v_item RECORD;
+    v_total DOUBLE PRECISION:=0;
+FOR v_item IN
+    SELECT cd.id_product, cd_cuantity, p.product_price
+    FROM cart_detail cd
+    JOIN products p ON p.id_product = cd.id_product
+    WHERE cd.id_shopping_cart = v_id_shopping_cart
+LOOP
+    v_subtotal := v_item.quantity * v_item.product_price;
+    v_total := v_total + v_subtotal
+    INSERT INTO detail_payments (id_payment,id_product,quantity,unit_price,subtotal) VALUES (,cd.id_product,cd_cuantity,p.product_price,v_subtotal);
+END LOOP
+'''
 
 
 
