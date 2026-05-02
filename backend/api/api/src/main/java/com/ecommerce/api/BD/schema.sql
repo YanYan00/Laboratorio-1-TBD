@@ -126,12 +126,12 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_stock
 BEFORE INSERT ON detail_payment
 FOR EACH ROW 
-EXECUTE FUNCTION check_stock_before_order;
+EXECUTE FUNCTION check_stock_before_order();
 
 --- Trigger para modificar el campo last_purchase
 
-CREATE OR REPLACE FUNVTION update_last_Purchase()
-        RETURN TRIGGER AS $$
+CREATE OR REPLACE FUNCTION update_last_Purchase()
+        RETURNS TRIGGER AS $$
        BEGIN
        IF NEW.status = 'APPROVED' THEN
           UPDATE users
@@ -145,9 +145,9 @@ $$ LANGUAGE plpgsql;
 
 -- triger que se ejecutara al cambiar el status de pendiente a aprovado
    CREATE TRIGGER trigger_last_purchase
-    AFTER UPDATE payments
+    AFTER UPDATE ON payments
     FOR EACH ROW
-    EXECUTE FUNCTION update_last_Purchase;
+    EXECUTE FUNCTION update_last_Purchase();
 
 
 
@@ -157,26 +157,25 @@ $$ LANGUAGE plpgsql;
 
 --- vista materializada de "ventas mensuales por categorias de productos"
 CREATE MATERIALIZED VIEW  monthly_sales_by_product_category AS
-       SELECT DATE_TRUNC('month',p.payment_date) AS month,
-       c.id_catergory,
+SELECT DATE_TRUNC('month',p.payment_date) AS month,
+       c.id_category,
        c.category_name,
        SUM(dp.quantity) AS total_product_sold,
        SUM(dp.subtotal) AS total_sales_amount
 
-       FROM payments p
-       JOIN detail_payment dp on dp.id_payment = p.id_payment
-        JOIN products pr ON dp.id_category = pr.id_category
+    FROM payments p
+        JOIN detail_payment dp on dp.id_payment = p.id_payment
+        JOIN products pr ON dp.id_product = pr.id_product
         JOIN categories c on pr.id_category = c.id_category
 
-        WHERE p.status = 'APPROVED'
+    WHERE p.status = 'APPROVED'
 
-        GROUP BY
-            DATE_TRUNC('month', p.payment_date),
-            c.id_category,
-            c.Caategory_name
+    GROUP BY
+        DATE_TRUNC('month', p.payment_date),
+        c.id_category,
+        c.Category_name
 
-        order by month, total_sales_amount DESC;
-
+    order by month, total_sales_amount DESC;
 
 
 
