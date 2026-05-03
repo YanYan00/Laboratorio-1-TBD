@@ -1,25 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
+import { CartProvider } from "./context/CartContext";
+import Header from "./components/Header";
+import SubNav from "./components/SubNav";
+import HomePage from "./pages/HomePage";
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
+import CartPage from "./pages/CartPage";
 
-function App() {
+const theme = createTheme({
+  palette: { primary: { main: "#1565C0" }, background: { default: "#F5F7FB" } },
+  typography: { fontFamily: "'Inter', 'Roboto', sans-serif" },
+  shape: { borderRadius: 8 },
+});
+
+const App = () => {
+  const [page, setPage] = useState("home");
+
+  const renderPage = () => {
+    switch (page) {
+      case "register": return <RegisterPage onNavigate={setPage} />;
+      case "login":    return <LoginPage onNavigate={setPage} />;
+      case "cart":     return <CartPage onNavigate={setPage} />;
+      default:         return <HomePage onNavigate={setPage} />;
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <CartProvider>
+        {page === "home" && <Header onNavigate={setPage} />}
+        {page === "home" && <SubNav />}
+        {renderPage()}
+      </CartProvider>
+    </ThemeProvider>
   );
-}
+};
 
 export default App;
