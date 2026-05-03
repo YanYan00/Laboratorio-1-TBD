@@ -146,9 +146,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+SELECT name_user, last_purchase FROM users WHERE id_user = 2;
 -- triger que se ejecutara al cambiar el status de pendiente a aprobado
 CREATE TRIGGER trigger_last_purchase
-    AFTER UPDATE ON payments
+    AFTER INSERT OR UPDATE ON payments
     FOR EACH ROW
 EXECUTE FUNCTION update_last_Purchase();
 
@@ -268,15 +269,15 @@ INSERT INTO roles (id_role, name_role) VALUES (2, 'USER')  ON CONFLICT (id_role)
 -- =====================
 -- AUTH USERS
 -- =====================
--- Admin: password = Admin1234
+-- Admin: password = 12345678
 INSERT INTO auth_user (username, password, email, id_role)
 VALUES ('jean.rojas', '$2a$12$t9i6h/nyBBuqEYLGyVbf2en17FPrnpDtYT5MChGXie0ct85s9BcrO', 'jean.rojas@mail.com', 1);
 
--- User 1: password = User1234
+-- User 1: password = 12345678
 INSERT INTO auth_user (username, password, email, id_role)
 VALUES ('manuel.orellana', '$2a$12$t9i6h/nyBBuqEYLGyVbf2en17FPrnpDtYT5MChGXie0ct85s9BcrO', 'manuel.orellana@mail.com', 2);
 
--- User 2: password = User1234
+-- User 2: password = 12345678
 INSERT INTO auth_user (username, password, email, id_role)
 VALUES ('luciano.carril', '$2a$12$t9i6h/nyBBuqEYLGyVbf2en17FPrnpDtYT5MChGXie0ct85s9BcrO', 'luciano.carril@mail.com', 2);
 
@@ -341,4 +342,6 @@ INSERT INTO cart_detail (id_shopping_cart, id_product, quantity) VALUES (1, 5, 3
 INSERT INTO cart_detail (id_shopping_cart, id_product, quantity) VALUES (2, 1, 1);
 INSERT INTO cart_detail (id_shopping_cart, id_product, quantity) VALUES (2, 3, 2);
 
-SELECT * FROM auth_user;
+--SELECT * FROM auth_user;
+--SELECT name_user, last_purchase FROM users WHERE id_user = 2;
+--INSERT INTO detail_payment (id_payment, id_product, quantity, unit_price, subtotal)VALUES (1, 1, 9999, 8990, 89900000);

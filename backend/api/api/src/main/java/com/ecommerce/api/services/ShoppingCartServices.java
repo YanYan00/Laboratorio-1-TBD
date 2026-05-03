@@ -33,12 +33,6 @@ public class ShoppingCartServices {
             return "Error: Producto no encontrado";
         }
 
-        Product RealProduct = product.get();
-
-        if(RealProduct.getStock() < purchase.getQuantity()){
-            return "Error: no hay stock suficiente";
-        }
-
         Optional<ShoppingCart> cart = shoppingCartRepository.findByUserId(purchase.getId_user());
 
         Long id_cart;
