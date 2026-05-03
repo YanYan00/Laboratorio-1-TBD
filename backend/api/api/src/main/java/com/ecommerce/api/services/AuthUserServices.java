@@ -42,15 +42,15 @@ public class AuthUserServices {
         return "Usuario registrado con exito";
     }
 
-    public String loginUser(LoginDTO login){
+    public String loginUser(LoginDTO login) {
         AuthUser user = authUserRepository.findByIdentifier(login.getIdentifier());
-        if (user == null){
+        if (user == null) {
             throw new RuntimeException("Credenciales invalidas");
         }
-        if(passwordEncoder.matches(login.getPassword(),user.getPassword())){
-            return jwtUtils.generateToken(user);
-        }
-        else {
+        if (passwordEncoder.matches(login.getPassword(), user.getPassword())) {
+            Integer idUser = authUserRepository.findIdUserByIdAuth(user.getId_auth());
+            return jwtUtils.generateToken(user, idUser);
+        } else {
             throw new RuntimeException("Contrasena incorrecta");
         }
     }

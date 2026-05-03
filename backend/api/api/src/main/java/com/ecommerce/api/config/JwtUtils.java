@@ -23,11 +23,12 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    public String generateToken(AuthUser user) {
+    public String generateToken(AuthUser user, int id_user) {
         return Jwts.builder()
                 .claim("id_auth", user.getId_auth())
                 .claim("email", user.getEmail())
                 .claim("role", user.getRoleName())
+                .claim("id_user", id_user)
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
@@ -50,5 +51,14 @@ public class JwtUtils {
                 .parseClaimsJws(token)
                 .getBody()
                 .get("role", String.class);
+    }
+
+    public Integer extractIdUser(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("id_user", Integer.class);
     }
 }

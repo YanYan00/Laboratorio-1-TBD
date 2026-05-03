@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS users (
 -- 5. Tabla de Categorías
 CREATE TABLE IF NOT EXISTS categories (
     id_category SERIAL PRIMARY KEY,
-     category_name VARCHAR(30) NOT NULL,
+    category_name VARCHAR(30) NOT NULL,
     category_description VARCHAR(125) NOT NULL
-    );
+);
 -- 4. Tabla de Productos
 CREATE TABLE IF NOT EXISTS products (
     id_product SERIAL PRIMARY KEY,
@@ -44,10 +44,12 @@ CREATE TABLE IF NOT EXISTS products (
     product_name VARCHAR(30) NOT NULL,
     product_description VARCHAR(125) NOT NULL,
     product_price DOUBLE PRECISION NOT NULL,
+    original_price DOUBLE PRECISION DEFAULT NULL,
+    percent_discount INTEGER DEFAULT 0,
     stock DOUBLE PRECISION NOT NULL,
     FOREIGN KEY (id_category) REFERENCES categories(id_category),
     FOREIGN KEY (id_user) REFERENCES users(id_user)
-    );
+);
 
 
 
@@ -64,10 +66,8 @@ CREATE TABLE IF NOT EXISTS cart_detail (
     id_shopping_cart INTEGER NOT NULL,
     id_product INTEGER NOT NULL,
     quantity DOUBLE PRECISION,
-    purchase_date  TIMESTAMP NOT NULL,
     FOREIGN KEY (id_shopping_cart) REFERENCES shopping_cart(id_shopping_cart),
     FOREIGN KEY (id_product) REFERENCES products(id_product)
-
 
 );
 
@@ -143,17 +143,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- triger que se ejecutara al cambiar el status de pendiente a aprovado
+-- triger que se ejecutara al cambiar el status de pendiente a aprobado
    CREATE TRIGGER trigger_last_purchase
     AFTER UPDATE ON payments
     FOR EACH ROW
     EXECUTE FUNCTION update_last_Purchase();
-
-
-
-
-
-
 
 --- vista materializada de "ventas mensuales por categorias de productos"
 CREATE MATERIALIZED VIEW  monthly_sales_by_product_category AS
@@ -177,36 +171,82 @@ SELECT DATE_TRUNC('month',p.payment_date) AS month,
 
     order by month, total_sales_amount DESC;
 
-
-
-
-
-
-
-'''
+-- Procedure
 CREATE OR REPLACE PROCEDURE  checkout_cart(
     p_id_user INT
-)LANGUAGE plpgpsl
+)LANGUAGE plpgsql
+AS $$
 DECLARE
-    v_id_shopping_cart INT
-BEGIN
-    v_id_shopping_cart = SELECT id_shopping_cart FROM shopping_cart s WHERE p_id_user = s.id_user;
-DECLARE
+    --Variables to usage in procedure
     v_item RECORD;
-    v_total DOUBLE PRECISION:=0;
-FOR v_item IN
-    SELECT cd.id_product, cd_cuantity, p.product_price
-    FROM cart_detail cd
-    JOIN products p ON p.id_product = cd.id_product
-    WHERE cd.id_shopping_cart = v_id_shopping_cart
-LOOP
-    v_subtotal := v_item.quantity * v_item.product_price;
-    v_total := v_total + v_subtotal
-    INSERT INTO detail_payments (id_payment,id_product,quantity,unit_price,subtotal) VALUES (,cd.id_product,cd_cuantity,p.product_price,v_subtotal);
-END LOOP
-'''
+    v_total DOUBLE PRECISION :=0;
+    v_subtotal DOUBLE PRECISION;
+    v_id_payment INT;
+    v_id_shopping_cart  INT;
+BEGIN
+    --Select cart of user
+    SELECT id_shopping_cart INTO v_id_shopping_cart
+    FROM shopping_cart
+    WHERE id_user = p_id_user;
+    FOR v_item IN
+        SELECT cd.id_product, cd.quantity, p.product_price
+        FROM cart_detail cd
+                 JOIN products p ON p.id_product = cd.id_product
+        WHERE cd.id_shopping_cart = v_id_shopping_cart
+        Loop
+            v_subtotal := v_item.quantity * v_item.product_price;
+            v_total    := v_total + v_subtotal;
+        END LOOP;
+    --Insert general information of payment obtained in loop
+    INSERT INTO payments (id_user,total,payment_date,status)
+    VALUES (p_id_user,v_total, NOW(),'APPROVED')
+    --Take the payment
+    RETURNING id_payment INTO v_id_payment;
+    FOR v_item IN
+        SELECT cd.id_product,cd.quantity,p.product_price
+        FROM cart_detail cd
+                 JOIN products p ON p.id_product = cd.id_product
+        WHERE cd.id_shopping_cart = v_id_shopping_cart
+        LOOP
+            v_subtotal := v_item.quantity * v_item.product_price;
+            --Insert payment detail before execute update products
+            INSERT INTO detail_payment(id_payment, id_product, quantity, unit_price, subtotal)
+            VALUES (v_id_payment,v_item.id_product,v_item.quantity,v_item.product_price,v_subtotal);
+            --Rest product quantity
+            UPDATE products
+            SET stock = stock - v_item.quantity
+            WHERE id_product = v_item.id_product;
+        END LOOP;
+    --Delete detail cart user
+    DELETE FROM cart_detail
+    WHERE id_shopping_cart = v_id_shopping_cart;
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+$$;
 
-
+CREATE OR REPLACE PROCEDURE  apply_discount(
+    p_id_category INT,
+    p_percent_discount INT
+)LANGUAGE plpgsql
+AS $$
+DECLARE
+BEGIN
+    UPDATE products
+    SET original_price = product_price,
+        product_price = product_price * (1 - p_percent_discount / 100.0),
+        percent_discount = p_percent_discount
+    WHERE id_category = p_id_category AND percent_discount = 0;
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+$$;
 
 INSERT INTO roles (id_role, name_role) VALUES (1, 'ADMIN')
     ON CONFLICT (id_role) DO NOTHING;

@@ -66,4 +66,8 @@ public class AuthUserRepository {
             return null;
         }, identifier, identifier);
     }
+    public Integer findIdUserByIdAuth(Long idAuth) {
+        String sql = "SELECT id_user FROM users WHERE id_auth = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, idAuth);
+    }
 }

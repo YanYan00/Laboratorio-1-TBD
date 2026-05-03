@@ -21,12 +21,9 @@ public class CartDetailRepository {
             rs.getLong("id_detail"),
             rs.getLong("id_shopping_cart"),
             rs.getLong("id_product"),
-            rs.getDouble("quantity"),
-            rs.getTimestamp("purchase_date").toLocalDateTime()
+            rs.getDouble("quantity")
     );
-
-
-    // crate
+    // create
     public  int saveCartDetail(CartDetail cartDetail){
         String sql= """
                 INSERT INTO cart_detail (id_shopping_cart, id_product, quantity)
@@ -63,9 +60,7 @@ public class CartDetailRepository {
                     id_shopping_cart = ?,
                     id_product = ?,
                     quantity = ?
-                
-                WHERE id_detail = ?
-                
+                WHERE id_detail = ? 
                 """;
 
         return jdbcTemplate.update(sql,

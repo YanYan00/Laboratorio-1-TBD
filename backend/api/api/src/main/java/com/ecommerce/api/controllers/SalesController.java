@@ -4,8 +4,10 @@ import com.ecommerce.api.dto.SalesDTO;
 
 import com.ecommerce.api.services.SalesService;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -31,5 +33,12 @@ public class SalesController {
         return salesService.getMySales();
     }
 
-
+    @PostMapping
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> checkout_cart(HttpServletRequest request){
+        String token = request.getHeader("Authorization").substring(7);
+        Integer idUser = jwtUtils.extractIdUser(token);
+        salesService.checkout(idUser);
+        return ResponseEntity.ok("Checkout procesado");
+    }
 }
