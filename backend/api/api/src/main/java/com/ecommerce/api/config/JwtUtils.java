@@ -4,6 +4,7 @@ import com.ecommerce.api.models.AuthUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -60,5 +61,17 @@ public class JwtUtils {
                 .parseClaimsJws(token)
                 .getBody()
                 .get("id_user", Integer.class);
+    }
+
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        return request.getHeader("Authorization").substring(7);
+    }
+
+    public Integer extractIdUser(HttpServletRequest request) {
+        return extractIdUser(extractTokenFromRequest(request));
+    }
+
+    public boolean hasRole(HttpServletRequest request, String role) {
+        return role.equals(extractRole(extractTokenFromRequest(request)));
     }
 }

@@ -1,16 +1,15 @@
 package com.ecommerce.api.controllers;
 
+import com.ecommerce.api.config.JwtUtils;
 import com.ecommerce.api.dto.SalesDTO;
 
 import com.ecommerce.api.services.SalesService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,9 +18,10 @@ import java.util.List;
 public class SalesController {
 
 
-
     private final SalesService salesService;
 
+    @Autowired
+    private JwtUtils jwtUtils;
 
     public SalesController(SalesService salesService) {
         this.salesService = salesService;
@@ -33,12 +33,39 @@ public class SalesController {
         return salesService.getMySales();
     }
 
-    @PostMapping
+    @PostMapping("/checkout")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> checkout_cart(HttpServletRequest request){
-        String token = request.getHeader("Authorization").substring(7);
-        Integer idUser = jwtUtils.extractIdUser(token);
-        salesService.checkout(idUser);
-        return ResponseEntity.ok("Checkout procesado");
+    public ResponseEntity<?> checkout(
+            @RequestParam String paymentMethod,
+            HttpServletRequest httpRequest) {
+        Integer idUser = jwtUtils.extractIdUser(httpRequest);
+        return ResponseEntity.ok(salesService.checkout(idUser, paymentMethod));
+    }
+
+    @PatchMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> approvePayment(@PathVariable Integer id) {
+        return ResponseEntity.ok(salesService.approvePayment(id));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<?> cancelPayment(@PathVariable Integer id, HttpServletRequest httpRequest) {
+        Integer idUser  = jwtUtils.extractIdUser(httpRequest);
+        boolean isAdmin = jwtUtils.hasRole(httpRequest, "ADMIN");
+        return ResponseEntity.ok(salesService.cancelPayment(id, idUser, isAdmin));
+    }
+
+    @GetMapping("/pending")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getPendingPayments() {
+        return ResponseEntity.ok(salesService.getPendingPayments());
+    }
+
+    @GetMapping("/my-orders")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getMyOrders(HttpServletRequest httpRequest) {
+        Integer idUser = jwtUtils.extractIdUser(httpRequest);
+        return ResponseEntity.ok(salesService.getMyPayments(idUser));
     }
 }

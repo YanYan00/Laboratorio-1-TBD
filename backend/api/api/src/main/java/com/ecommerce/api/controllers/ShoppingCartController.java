@@ -1,14 +1,16 @@
 package com.ecommerce.api.controllers;
 
+import com.ecommerce.api.models.ShoppingCart;
+import com.ecommerce.api.repositories.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import com.ecommerce.api.dto.CartPurchaseDTO;
 import com.ecommerce.api.services.ShoppingCartServices;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.Optional;
 
 
 @RestController
@@ -18,6 +20,8 @@ public class ShoppingCartController {
 
     @Autowired
     private ShoppingCartServices shoppingCartServices;
+    @Autowired
+    private UsersRepository usersRepository;
 
     @PostMapping("/add")
     public ResponseEntity<?> addToCart(@RequestBody CartPurchaseDTO purchase){
@@ -29,5 +33,17 @@ public class ShoppingCartController {
         }
         
         return ResponseEntity.ok(response);
+    }
+    @GetMapping("/my-cart")
+    public ResponseEntity<?> getMyCart(Authentication authentication) {
+        String username = authentication.getName();
+        Long userId = usersRepository.findIdByUsername(username);
+        Optional<ShoppingCart> cart = shoppingCartServices.getCartByUserId(userId);
+
+        if (cart.isEmpty()) {
+            return ResponseEntity.ok("El carrito está vacío");
+        }
+
+        return ResponseEntity.ok(cart.get());
     }
 }

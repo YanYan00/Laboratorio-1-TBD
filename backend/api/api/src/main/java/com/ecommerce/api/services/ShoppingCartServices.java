@@ -53,12 +53,15 @@ public class ShoppingCartServices {
             null,
             id_cart,
             purchase.getId_product(),
-            purchase.getQuantity(),
-            null
+            purchase.getQuantity()
         );
 
         int saved = cartDetailRepository.saveCartDetail(cartDetail);
 
         return saved > 0 ? "Producto agregado al carrito con exito" : "Error al guardar el carrito";
+    }
+
+    public Optional<ShoppingCart> getCartByUserId(Long id_user) {
+        return shoppingCartRepository.findByUserId(id_user);
     }
 }
