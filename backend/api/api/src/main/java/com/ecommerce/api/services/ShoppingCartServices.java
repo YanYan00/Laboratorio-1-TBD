@@ -25,18 +25,22 @@ public class ShoppingCartServices {
     @Autowired
     ProductRepository productRepository;
 
-    public String addProductToCart(CartPurchaseDTO purchase){
-
+     public String addProductToCart(CartPurchaseDTO purchase){
+        
         Optional<Product> product = productRepository.findById(purchase.getId_product());
 
         if(product.isEmpty()){
             return "Error: Producto no encontrado";
         }
 
+        Product RealProduct = product.get();
+
+        if(RealProduct.getStock() < purchase.getQuantity()){
+            return "Error: no hay stock suficiente";
+        }
+
         Optional<ShoppingCart> cart = shoppingCartRepository.findByUserId(purchase.getId_user());
-
         Long id_cart;
-
         if(cart.isPresent()){
             id_cart = cart.get().getId_shoppingCart();
         }else{
@@ -49,9 +53,7 @@ public class ShoppingCartServices {
             purchase.getId_product(),
             purchase.getQuantity()
         );
-
         int saved = cartDetailRepository.saveCartDetail(cartDetail);
-
         return saved > 0 ? "Producto agregado al carrito con exito" : "Error al guardar el carrito";
     }
 

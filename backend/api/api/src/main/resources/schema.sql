@@ -345,3 +345,9 @@ INSERT INTO cart_detail (id_shopping_cart, id_product, quantity) VALUES (2, 3, 2
 --SELECT * FROM auth_user;
 --SELECT name_user, last_purchase FROM users WHERE id_user = 2;
 --INSERT INTO detail_payment (id_payment, id_product, quantity, unit_price, subtotal)VALUES (1, 1, 9999, 8990, 89900000);
+
+---Index
+CREATE INDEX index_products_sku ON products(SKU_product);
+CREATE INDEX index_payments_user ON payments(id_user);
+CREATE INDEX index_products_name ON  products(product_name);
+CREATE INDEX index_products_description ON products(product_description);

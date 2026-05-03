@@ -81,6 +81,13 @@ public class ProductRepository {
                 product.getStock(),
                 id);
     }
+
+    public List<Product> searchByKeyword(String keyword){
+
+        String sql = "SELECT * FROM products WHERE product_name ILIKE ? OR product_description ILIKE ?";
+        String param = "%" + keyword + "%";
+        return jdbcTemplate.query(sql, productRowMapper, param, param);
+    }
 }
 
 

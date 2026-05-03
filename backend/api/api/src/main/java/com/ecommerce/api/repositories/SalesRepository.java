@@ -1,6 +1,7 @@
 package com.ecommerce.api.repositories;
 
 import com.ecommerce.api.dto.PaymentDTO;
+import com.ecommerce.api.dto.PurchaseDetailDTO;
 import com.ecommerce.api.dto.SalesDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,9 +13,8 @@ import java.util.List;
 @Repository
 public class SalesRepository {
 
-
-
-    private final JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public SalesRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -101,6 +101,27 @@ public class SalesRepository {
             p.setPaymentDate(rs.getTimestamp("payment_date").toLocalDateTime());
             return p;
         };
+    }
+
+    public List<PurchaseDetailDTO> getInvoiceDetails(Integer idPayment) {
+        String sql = """
+            SELECT p.id_payment, p.payment_date, pr.product_name, dp.unit_price, dp.quantity, dp.subtotal 
+            FROM payments p 
+            JOIN detail_payment dp ON p.id_payment = dp.id_payment 
+            JOIN products pr ON dp.id_product = pr.id_product 
+            WHERE p.id_payment = ?
+        """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            PurchaseDetailDTO dto = new PurchaseDetailDTO();
+            dto.setId_payment(rs.getLong("id_payment"));
+            dto.setPayment_date(rs.getTimestamp("payment_date").toLocalDateTime());
+            dto.setProduct_name(rs.getString("product_name"));
+            dto.setUnit_price(rs.getDouble("unit_price"));
+            dto.setQuantity(rs.getDouble("quantity"));
+            dto.setTotal_paid(rs.getDouble("subtotal"));
+            return dto;
+        }, idPayment);
     }
 
 }

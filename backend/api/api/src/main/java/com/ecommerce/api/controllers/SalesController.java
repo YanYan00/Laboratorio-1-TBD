@@ -1,8 +1,9 @@
 package com.ecommerce.api.controllers;
 
 import com.ecommerce.api.config.JwtUtils;
+import com.ecommerce.api.dto.PurchaseDetailDTO;
 import com.ecommerce.api.dto.SalesDTO;
-
+import com.ecommerce.api.repositories.SalesRepository;
 import com.ecommerce.api.services.SalesService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,11 +18,14 @@ import java.util.List;
 @RequestMapping("/api/sales")
 public class SalesController {
 
-
-    private final SalesService salesService;
+    @Autowired
+    private SalesService salesService;
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private SalesRepository salesRepository;
 
     public SalesController(SalesService salesService) {
         this.salesService = salesService;
@@ -67,5 +71,17 @@ public class SalesController {
     public ResponseEntity<?> getMyOrders(HttpServletRequest httpRequest) {
         Integer idUser = jwtUtils.extractIdUser(httpRequest);
         return ResponseEntity.ok(salesService.getMyPayments(idUser));
+    }
+
+    @GetMapping("/id_payment/purchase")
+    public ResponseEntity<?> getPurchaseHistory(@PathVariable Integer id_payment) {
+
+        List<PurchaseDetailDTO> invoiceDetails = salesRepository.getInvoiceDetails(id_payment);
+        
+        if(invoiceDetails.isEmpty()) {
+            return ResponseEntity.badRequest().body("Factura no encontrada o sin detalles");
+        }
+        
+        return ResponseEntity.ok(invoiceDetails);
     }
 }
