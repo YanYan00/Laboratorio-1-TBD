@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/products")
-
 public class ProductController {
 
     @Autowired
@@ -50,5 +49,12 @@ public class ProductController {
         List<Product> keywordProducts = productRepository.searchByKeyword(keyword);
         return ResponseEntity.ok(keywordProducts);
     }
+
+    //Lo agregué para el front
+    @GetMapping
+    public ResponseEntity<List<Product>> getAllProducts() {
+        List<Product> products = productRepository.findAll();
+        return ResponseEntity.ok(products);
+}
     
 }
