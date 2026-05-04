@@ -1,96 +1,76 @@
-import React from "react";
-import {
-  Box,
-  Typography,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-} from "@mui/material";
-import {
-  Bolt as BoltIcon,
-  PrecisionManufacturing as PrecisionManufacturingIcon,
-  Science as ScienceIcon,
-  Computer as ComputerIcon,
-  HealthAndSafety as HealthAndSafetyIcon,
-  LocalShipping as LocalShippingIcon,
-  Hardware as HardwareIcon,
-  BusinessCenter as BusinessCenterIcon,
-  ChevronRight as ChevronRightIcon,
-} from "@mui/icons-material";
+import React, { useEffect, useState } from "react";
+import { Box, Typography, Chip, Skeleton, Alert } from "@mui/material";
+import { getAllCategories } from "../services/categoryService";
 
-const FEATURED_CATS = [
-  { label: "Electrónica Industrial", icon: <BoltIcon /> },
-  { label: "Maquinaria",             icon: <PrecisionManufacturingIcon /> },
-  { label: "Materias Primas",        icon: <ScienceIcon /> },
-  { label: "Tecnología B2B",         icon: <ComputerIcon /> },
-  { label: "Salud y Seguridad",      icon: <HealthAndSafetyIcon /> },
-  { label: "Logística",              icon: <LocalShippingIcon /> },
-  { label: "Ferretería",             icon: <HardwareIcon /> },
-  { label: "Insumos Corporativos",   icon: <BusinessCenterIcon /> },
-];
+const FeaturedCategories = ({ onCategorySelect, selectedId }) => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState("");
 
-const FeaturedCategories = () => {
+  useEffect(() => {
+    getAllCategories()
+      .then(setCategories)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
-    <Box
-      sx={{
-        bgcolor: "white",
-        borderRadius: 3,
-        border: "1px solid #E3E8F0",
-        boxShadow: "0 2px 8px rgba(21,101,192,0.06)",
-        overflow: "hidden",
-        height: "fit-content",
-      }}
-    >
-      <Box sx={{ px: 2.5, py: 2, bgcolor: "#F0F4FF" }}>
-        <Typography variant="subtitle1" fontWeight={700} color="#1565C0" fontSize="0.9rem">
-          Categorías Destacadas
-        </Typography>
+    <Box sx={{ mb: 3 }}>
+      <Typography fontWeight={700} fontSize="0.9rem" color="#374151" mb={1.5}>
+        Categorías
+      </Typography>
+
+      {error && (
+        <Alert severity="error" sx={{ borderRadius: 2, mb: 1, fontSize: "0.78rem" }}>{error}</Alert>
+      )}
+
+      <Box sx={{
+        display: "flex", flexWrap: "wrap", gap: 1,
+      }}>
+        {/* Chip "Todos" */}
+        {!loading && (
+          <Chip
+            label="Todos"
+            onClick={() => onCategorySelect && onCategorySelect(null)}
+            sx={{
+              fontWeight: selectedId === null ? 700 : 500,
+              fontSize: "0.8rem",
+              bgcolor: selectedId === null ? "#1565C0" : "#F0F4FF",
+              color:   selectedId === null ? "white"   : "#1565C0",
+              border: "1px solid",
+              borderColor: selectedId === null ? "#1565C0" : "#C7D7F0",
+              "&:hover": { bgcolor: selectedId === null ? "#0D47A1" : "#DBEAFE" },
+              transition: "all 0.15s",
+            }}
+          />
+        )}
+
+        {loading
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} variant="rounded" width={100} height={32} sx={{ borderRadius: "16px" }} />
+            ))
+          : categories.map((cat) => {
+              const isSelected = selectedId === cat.id_category;
+              return (
+                <Chip
+                  key={cat.id_category}
+                  label={cat.category_name}
+                  onClick={() => onCategorySelect && onCategorySelect(cat)}
+                  sx={{
+                    fontWeight: isSelected ? 700 : 500,
+                    fontSize: "0.8rem",
+                    bgcolor: isSelected ? "#1565C0" : "#F0F4FF",
+                    color:   isSelected ? "white"   : "#1565C0",
+                    border: "1px solid",
+                    borderColor: isSelected ? "#1565C0" : "#C7D7F0",
+                    "&:hover": { bgcolor: isSelected ? "#0D47A1" : "#DBEAFE" },
+                    transition: "all 0.15s",
+                  }}
+                />
+              );
+            })
+        }
       </Box>
-      <Divider />
-      <List disablePadding>
-        {FEATURED_CATS.map((cat, idx) => (
-          <React.Fragment key={cat.label}>
-            <ListItemButton
-              sx={{
-                py: 1,
-                px: 2,
-                "&:hover": {
-                  bgcolor: "rgba(21,101,192,0.05)",
-                  "& .MuiListItemText-primary": { color: "#1565C0" },
-                  "& .arrow-icon": { opacity: 1, transform: "translateX(3px)" },
-                },
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 36, color: "#1565C0" }}>
-                {React.cloneElement(cat.icon, { sx: { fontSize: 20 } })}
-              </ListItemIcon>
-              <ListItemText
-                primary={cat.label}
-                primaryTypographyProps={{
-                  fontSize: "0.82rem",
-                  fontWeight: 500,
-                  color: "#374151",
-                  transition: "color 0.15s",
-                }}
-              />
-              <ChevronRightIcon
-                className="arrow-icon"
-                sx={{
-                  fontSize: 16,
-                  color: "#9CA3AF",
-                  opacity: 0,
-                  transition: "all 0.15s ease",
-                }}
-              />
-            </ListItemButton>
-            {idx < FEATURED_CATS.length - 1 && (
-              <Divider sx={{ mx: 2, borderColor: "#F3F4F6" }} />
-            )}
-          </React.Fragment>
-        ))}
-      </List>
     </Box>
   );
 };

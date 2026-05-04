@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
-
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -28,33 +26,33 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
-    public ProductController(ProductService product){
+    public ProductController(ProductService product) {
         this.productService = product;
     }
 
     @PostMapping("/publish")
-    public ResponseEntity<?> publishAProduct(@RequestBody ProductDTO productToPublish){
-        
+    public ResponseEntity<?> publishAProduct(@RequestBody ProductDTO productToPublish) {
         String response = productService.publishProduct(productToPublish);
-        
-        if(response.contains("Error")){
-            return ResponseEntity.badRequest().body(response); 
+        if (response.contains("Error")) {
+            return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword){
-
+    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword) {
         List<Product> keywordProducts = productRepository.searchByKeyword(keyword);
         return ResponseEntity.ok(keywordProducts);
     }
 
-    //Lo agregué para el front
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productRepository.findAll();
+    public ResponseEntity<List<Product>> getAllProducts(
+            @RequestParam(required = false) Long id_category) {
+
+        List<Product> products = (id_category != null)
+                ? productRepository.findByCategory(id_category)
+                : productRepository.findAll();
+
         return ResponseEntity.ok(products);
-}
-    
+    }
 }

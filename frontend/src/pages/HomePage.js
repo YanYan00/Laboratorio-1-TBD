@@ -1,20 +1,26 @@
 import React, { useState } from "react";
-import { Box, Container, Grid } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import FeaturedCategories from "../components/FeaturedCategories";
-import ProductGrid from "../components/ProductGrid";
+import ProductGrid        from "../components/ProductGrid";
 
-const HomePage = ({ onNavigate, onSearchResults }) => {
+const HomePage = ({ onNavigate, searchValue, onSearchChange }) => {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const handleCategorySelect = (cat) => {
+    setSelectedCategory(cat);
+  };
+
   return (
-    <Box sx={{ bgcolor: "#F5F7FB", minHeight: "100vh", py: 3 }}>
-      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 4 } }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={3} lg={2.5}>
-            <FeaturedCategories />
-          </Grid>
-          <Grid item xs={12} md={9} lg={9.5}>
-            <ProductGrid />
-          </Grid>
-        </Grid>
+    <Box sx={{ bgcolor: "#F5F7FB", minHeight: "100vh" }}>
+      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 4 }, py: 3 }}>
+        <FeaturedCategories
+          selectedId={selectedCategory?.id_category ?? null}
+          onCategorySelect={handleCategorySelect}
+        />
+        <ProductGrid
+          categoryId={selectedCategory?.id_category ?? null}
+          searchValue={searchValue}
+        />
       </Container>
     </Box>
   );

@@ -88,6 +88,11 @@ public class ProductRepository {
         String param = "%" + keyword + "%";
         return jdbcTemplate.query(sql, productRowMapper, param, param);
     }
+
+    public List<Product> findByCategory(Long idCategory) {
+        String sql = "SELECT * FROM products WHERE id_category = ?";
+        return jdbcTemplate.query(sql, productRowMapper, idCategory);
+}
 }
 
 

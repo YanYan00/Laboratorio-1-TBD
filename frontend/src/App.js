@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import Header from "./components/Header";
-import SubNav from "./components/SubNav";
-import HomePage from "./pages/HomePage";
+import Header    from "./components/Header";
+import SubNav    from "./components/SubNav";
+import HomePage  from "./pages/HomePage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
-import CartPage from "./pages/CartPage";
+import CartPage  from "./pages/CartPage";
 import BuyerPage from "./pages/BuyerPage";
 
 const theme = createTheme({
@@ -16,16 +16,15 @@ const theme = createTheme({
   shape: { borderRadius: 8 },
 });
 
-// Componente interno — puede usar useAuth porque está dentro de AuthProvider
 const AppContent = () => {
-  const [page, setPage] = useState("home");
-  const { isAuthenticated, logout } = useAuth();
+  const [page, setPage]               = useState("home");
+  const [searchValue, setSearchValue] = useState("");
+  const { isAuthenticated, logout }   = useAuth();
 
   const handleNavigate = (target) => {
-    if (target === "home" && !isAuthenticated) {
-      logout(); // limpia sesión si va a home sin auth (desde logout sidebar)
-    }
+    if (target === "home" && !isAuthenticated) logout();
     setPage(target);
+    setSearchValue(""); // limpia búsqueda al navegar
   };
 
   const handleLogout = () => {
@@ -39,24 +38,28 @@ const AppContent = () => {
       case "login":    return <LoginPage onNavigate={setPage} />;
       case "cart":     return <CartPage onNavigate={setPage} />;
       case "buyer":    return <BuyerPage onNavigate={setPage} onLogout={handleLogout} />;
-      default:         return <HomePage onNavigate={setPage} />;
+      default:         return (
+        <HomePage
+          onNavigate={setPage}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+        />
+      );
     }
   };
 
-  const isBuyer  = page === "buyer";
-  const showHeader = !isBuyer; // BuyerPage tiene su propio header
+  const isBuyer    = page === "buyer";
+  const showHeader = !isBuyer;
   const headerMode = isAuthenticated ? "buyer" : "guest";
 
   return (
     <>
       {showHeader && (
-        <Header
-          onNavigate={setPage}
-          mode={headerMode}
-          onLogout={handleLogout}
-        />
+        <Header onNavigate={setPage} mode={headerMode} onLogout={handleLogout} />
       )}
-      {showHeader && page === "home" && <SubNav />}
+      {showHeader && page === "home" && (
+        <SubNav searchValue={searchValue} onSearchChange={setSearchValue} />
+      )}
       {renderPage()}
     </>
   );
