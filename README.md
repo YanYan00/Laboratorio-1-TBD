@@ -67,3 +67,63 @@ bash:
 npm run dev
 ```
 ya tienes la aplicacion corriendo.
+
+
+
+*** Endpoints ***
+
+//Auth
+POST http://localhost:8090/api/auth/register
+{
+    "username": "jean.rojas",
+    "password": "12345678",
+    "confirmPassword": "12345678",
+    "email": "jean.rojas@mail.com",
+    "name_user": "Jean Rojas",
+    "rut": "12345678-9",
+    "address": "Avenida Siempre Viva 742",
+    "phone": "+56912345678"
+}
+Ruta para registrar a un usuario, siempre registrara a un usuario como user, el administrador viene registrado desde que se levanta la pagina
+
+POST http://localhost:8090/api/auth/login
+{
+    "identifier": "jean.rojas" o "jean.rojas@mail.com",
+    "password": "12345678"
+}
+Ruta para loguear a un usuario a traves de su username o correo registrado, devuelve el access token que servira para usar las diferentes rutas
+
+//Users
+GET http://localhost:8090/api/users/me
+Endpoint que funciona con Bearer Token donde se envia el token del usuario para recibir sus datos de perfil
+Ruta ADMIN o USER
+
+GET http://localhost:8090/api/users/profiles
+Endpoint que funciona con Bearer Token donde se envia el token del usuario para recibir los perfiles de cada usuario
+Ruta solo para rol ADMIN
+
+//Cart
+GET http://localhost:8090/api/cart/my-cart
+Endpoint que funciona con Bearer Token donde se envia el token del usuario para recibir el contenido de su carrito
+
+
+//Sales
+GET http://localhost:8090/api/sales/my-orders
+Endpoint que funciona con Bearer Token donde se envia el token del usuario para recibir sus compras
+Ruta solo para rol USER
+
+POST http://localhost:8090/api/sales/checkout?paymentMethod={CARD o TRANSFER}
+Endpoint que funciona con bearer Token donde se envia el token del usuario y ademas se manda como param el medio de pago que realiza en caso de ser card se guarda como pago aprobado en otro caso pendiente
+Ruta solo para rol USER
+
+GET http://localhost:8090/api/sales/pending
+Endpoint que funciona con bearer Token donde se envia el token del usuario.
+Ruta solo para rol ADMIN
+
+PATCH http://localhost:8090/api/sales/{id_payment}/approve
+Endpoint que funciona con bearer Token donde se envia el token del usuario
+Ruta solo para rol ADMIN
+
+PATCH http://localhost:8090/api/sales/{id_payment}/cancel
+Endpoint que funciona con bearer Token donde se envia el token del usuario, puede un usuario cancelar su propia compra o un administrador cancelar una compra aprobada o pendiente.
+Ruta ADMIN o USER
