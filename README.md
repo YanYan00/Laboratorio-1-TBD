@@ -102,6 +102,11 @@ GET http://localhost:8090/api/users/profiles
 Endpoint que funciona con Bearer Token donde se envia el token del usuario para recibir los perfiles de cada usuario
 Ruta solo para rol ADMIN
 
+//Products
+GET http://localhost:8090/api/products/search?keyword=texto_a_buscar
+Endpoint para buscar productos por coincidencias parciales en su nombre o descripción.
+Ruta pública/USER
+
 //Cart
 GET http://localhost:8090/api/cart/my-cart
 Endpoint que funciona con Bearer Token donde se envia el token del usuario para recibir el contenido de su carrito
@@ -126,4 +131,8 @@ Ruta solo para rol ADMIN
 
 PATCH http://localhost:8090/api/sales/{id_payment}/cancel
 Endpoint que funciona con bearer Token donde se envia el token del usuario, puede un usuario cancelar su propia compra o un administrador cancelar una compra aprobada o pendiente.
+Ruta ADMIN o USER
+
+GET http://localhost:8090/api/sales/{id_payment}/purchase
+Endpoint que reconstruye el detalle histórico de una factura cruzando la información de pagos, detalles y productos.
 Ruta ADMIN o USER
