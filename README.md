@@ -136,3 +136,6 @@ Ruta ADMIN o USER
 GET http://localhost:8090/api/sales/{id_payment}/purchase
 Endpoint que reconstruye el detalle histórico de una factura cruzando la información de pagos, detalles y productos.
 Ruta ADMIN o USER
+
+GET http://localhost:8090/api/sales/my-sales
+Endpont que calcula y almacena un reporte mensual de ventas agrupados por categotia de productos, ademas devuelve la cantidad total de articulos vendidos, cuenta solamente los que tenga pagos aparobados
