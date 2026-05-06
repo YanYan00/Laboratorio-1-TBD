@@ -64,7 +64,7 @@ npm install
 Ejecutar:
 ```bash
 bash:
-npm run dev
+npm start
 ```
 ya tienes la aplicacion corriendo.
 
