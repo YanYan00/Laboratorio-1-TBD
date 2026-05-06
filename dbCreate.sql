@@ -187,7 +187,7 @@ CREATE OR REPLACE PROCEDURE checkout_cart(
 AS $$
 DECLARE
     v_item             RECORD;
-    v_total            DOUBLE PRECISION := 0; -- Inicializamos en 0
+    v_total            DOUBLE PRECISION := 0;
     v_subtotal         DOUBLE PRECISION;
     v_id_payment       INT;
     v_id_shopping_cart INT;
@@ -331,48 +331,3 @@ SELECT setval('auth_user_id_auth_seq', (SELECT MAX(id_auth) FROM auth_user));
 SELECT setval('users_id_user_seq', (SELECT MAX(id_user) FROM users));
 SELECT setval('categories_id_category_seq', (SELECT MAX(id_category) FROM categories));
 SELECT setval('products_id_product_seq', (SELECT MAX(id_product) FROM products));
-
--- =====================
--- SHOPPING CART
--- =====================
---INSERT INTO shopping_cart (id_shopping_cart, id_user) VALUES
---(3,4),
---(4,5),
---(5,9),
---(6,10),
---(7,13);
-
--- =====================
--- CART DETAIL
--- =====================
---INSERT INTO cart_detail (id_shopping_cart, id_product, quantity) VALUES
---(3,11,20),
---(3,15,10),
---(4,13,50),
---(4,14,30),
---(5,16,15),
---(5,8,40),
---(6,10,10),
---(6,9,25),
---(7,11,50),
---(7,14,100);
-
---SELECT * FROM auth_user;
---SELECT name_user, last_purchase FROM users WHERE id_user = 2;
---INSERT INTO detail_payment (id_payment, id_product, quantity, unit_price, subtotal)VALUES (1, 1, 9999, 8990, 89900000);
-
-SELECT * FROM detail_payment;
-SELECT * FROM payments;
-SELECT * FROM products;
-SELECT * FROM users;
-SELECT * FROM payments ORDER BY payment_date DESC;
-
-SELECT cd.*, p.product_name 
-FROM cart_detail cd 
-JOIN products p ON cd.id_product = p.id_product 
-WHERE cd.id_shopping_cart = (SELECT id_shopping_cart FROM shopping_cart WHERE id_user = 2);
-
--- INSERT INTO cart_detail (id_shopping_cart, id_product, quantity) 
--- VALUES ((SELECT id_shopping_cart FROM shopping_cart WHERE id_user = 2), 1, 1);
-
-SELECT id_category, category_name FROM categories;
