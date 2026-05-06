@@ -18,7 +18,7 @@ public class ProductService {
     }
 
     public String publishProduct(ProductDTO productToPublish){
-        
+
         if(productToPublish.getProductPrice() <= 0){
             return "Error: El precio de publicacion debe ser mayor a 0";
         }
@@ -26,10 +26,18 @@ public class ProductService {
         if(productToPublish.getId_user() == null){
             return "Error: El producto debe estar asociado a un usuario";
         }
-        
+
         int saved = productRepository.saveProduct(productToPublish);
-        
+
         return saved > 0 ? "Producto publicado" : "Error al publicar";
+    }
+
+    public void applyCategoryDiscount(Long categoryId, int percentage) {
+        productRepository.applyDiscount(categoryId, percentage);
+    }
+
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
     }
 
 }

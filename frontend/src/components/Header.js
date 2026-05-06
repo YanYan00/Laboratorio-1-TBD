@@ -4,16 +4,19 @@ import {
   Badge, Tooltip, Typography, Divider,
 } from "@mui/material";
 import {
-  ShoppingCartOutlined  as ShoppingCartOutlinedIcon,
-  PersonOutlined        as PersonOutlineIcon,
-  AppRegistration       as AppRegistrationIcon,
+  ShoppingCartOutlined   as ShoppingCartOutlinedIcon,
+  PersonOutlined         as PersonOutlineIcon,
+  AppRegistration        as AppRegistrationIcon,
   AccountCircleOutlined as AccountIcon,
-  LogoutOutlined        as LogoutIcon,
+  LogoutOutlined         as LogoutIcon,
 } from "@mui/icons-material";
-import CartDrawer  from "./CartDrawer";
+import CartDrawer from "./CartDrawer";
 import LogoutDialog from "./LogoutDialog";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import PercentIcon from '@mui/icons-material/Percent';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import PaymentsIcon from '@mui/icons-material/Payments'
 
 const StoreLogo = ({ onNavigate }) => (
   <Box onClick={() => onNavigate("home")}
@@ -38,6 +41,7 @@ const Header = ({ onNavigate, mode = "guest", onLogout }) => {
   const { user }                            = useAuth();
   const [drawerOpen, setDrawerOpen]         = useState(false);
   const [dialogOpen, setDialogOpen]         = useState(false);
+  const isAdmin = user?.id_auth === 1;
 
   const handleLogoutConfirm = () => {
     setDialogOpen(false);
@@ -116,7 +120,65 @@ const Header = ({ onNavigate, mode = "guest", onLogout }) => {
                 </Tooltip>
               </>
             )}
+           {/*Solo visible si isAdmin es true (Rol 1) */}
+            {isAdmin && (
+  <>
+    {/* Botón de Descuentos existente */}
+    <Button 
+      onClick={() => onNavigate("discounts")}
+      variant="contained"
+      startIcon={<PercentIcon />}
+      sx={{ 
+        bgcolor: "#FFD54F", 
+        color: "#0D47A1", 
+        fontWeight: 'bold',
+        textTransform: 'none',
+        borderRadius: '20px',
+        px: 2,
+        mr: 1,
+        "&:hover": { bgcolor: "#FFC107" } 
+      }}
+    >
+      Aplicar Descuento
+    </Button>
 
+    {/* NUEVO: Botón de Pagos Pendientes */}
+    <Button 
+      onClick={() => onNavigate("pending-payments")} 
+      variant="contained"
+      startIcon={<PaymentsIcon />} 
+      sx={{ 
+        bgcolor: "#D32F2F",
+        color: "white", 
+        fontWeight: 'bold',
+        textTransform: 'none',
+        borderRadius: '20px',
+        px: 2,
+        "&:hover": { bgcolor: "#B71C1C" } 
+      }}
+    >
+      Pagos Pendientes
+    </Button>
+  </>
+)}
+            {user && (
+            <Button 
+              onClick={() => onNavigate("create-product")}
+              variant="outlined"
+              startIcon={<AddCircleIcon />}
+              sx={{ 
+                color: "white", 
+                borderColor: "rgba(255,255,255,0.5)", 
+                textTransform: "none",
+                borderRadius: '20px',
+                "&:hover": { borderColor: "white", bgcolor: "rgba(255,255,255,0.1)" }
+              }}
+            >
+              Vender Producto
+            </Button>
+          )}
+            
+          
           </Box>
         </Toolbar>
       </AppBar>

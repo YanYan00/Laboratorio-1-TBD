@@ -32,9 +32,9 @@ public class ProductRepository {
     // create
     public int saveProduct(ProductDTO product) {
         String sql = """
-        INSERT INTO products (id_category, SKU_product, product_name, product_description, product_price, stock, id_user)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """;
+    INSERT INTO products (id_category, SKU_product, product_name, product_description, product_price, stock, id_user)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    """;
         return jdbcTemplate.update(sql,
                 product.getId_category(),
                 product.getSkuProduct(),
@@ -92,7 +92,16 @@ public class ProductRepository {
     public List<Product> findByCategory(Long idCategory) {
         String sql = "SELECT * FROM products WHERE id_category = ?";
         return jdbcTemplate.query(sql, productRowMapper, idCategory);
-}
+    }
+
+    public void applyDiscount(Long id_category, int percentage) {
+        String sql = "CALL apply_discount(?::int, ?::numeric)";
+        jdbcTemplate.update(sql, id_category, percentage);
+    }
+    public int reduceStock(Long idProduct, int quantity) {//
+        String sql = "UPDATE products SET stock = stock - ? WHERE id_product = ? AND stock >= ?";
+        return jdbcTemplate.update(sql, quantity, idProduct, quantity);
+    }
 }
 
 

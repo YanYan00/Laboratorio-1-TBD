@@ -59,14 +59,27 @@ public class SalesRepository {
         String sql = "CALL restore_stock_on_cancel(?)";
         jdbcTemplate.update(sql, idPayment);
     }
+    public void updateStatus(Integer idPayment, String status) {
+        String sql = "UPDATE payments SET status = ? WHERE id_payment = ?";
+        jdbcTemplate.update(sql, status, idPayment);
+    }
+
     public String getPaymentStatus(Integer idPayment) {
         String sql = "SELECT status FROM payments WHERE id_payment = ?";
-        return jdbcTemplate.queryForObject(sql, String.class, idPayment);
+        try {
+            return jdbcTemplate.queryForObject(sql, String.class, idPayment);
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     public Integer getPaymentOwner(Integer idPayment) {
         String sql = "SELECT id_user FROM payments WHERE id_payment = ?";
-        return jdbcTemplate.queryForObject(sql, Integer.class, idPayment);
+        try {
+            return jdbcTemplate.queryForObject(sql, Integer.class, idPayment);
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     public void discountStockFromPayment(Integer idPayment) {

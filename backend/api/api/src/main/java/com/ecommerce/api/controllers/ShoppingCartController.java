@@ -23,17 +23,26 @@ public class ShoppingCartController {
     @Autowired
     private UsersRepository usersRepository;
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addToCart(@RequestBody CartPurchaseDTO purchase){
+    @PostMapping("/add") //
+    public ResponseEntity<?> addToCart(
+            @RequestBody CartPurchaseDTO purchase,
+            Authentication authentication
+    ) {
+        String username = authentication.getName();
+
+        Long userId = usersRepository.findIdByUsername(username);
+
+        purchase.setId_user(userId);
 
         String response = shoppingCartServices.addProductToCart(purchase);
 
         if(response.contains("Error")){
             return ResponseEntity.badRequest().body(response);
         }
-        
+
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("/my-cart")
     public ResponseEntity<?> getMyCart(Authentication authentication) {
         String username = authentication.getName();

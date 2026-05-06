@@ -1,5 +1,6 @@
 package com.ecommerce.api.services;
 
+import com.ecommerce.api.dto.CartPurchaseDTO;
 import com.ecommerce.api.dto.PaymentDTO;
 import com.ecommerce.api.dto.SalesDTO;
 import com.ecommerce.api.repositories.SalesRepository;
@@ -7,6 +8,7 @@ import com.ecommerce.api.repositories.UsersRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 @Service
@@ -33,13 +35,20 @@ public class SalesService {
         return salesRepository.findByUser(idUser);
     }
 
-    public String checkout(Integer idUser, String paymentMethod) {
-        List<String> validMethods = List.of("CARD", "TRANSFER");
+    @Transactional
+    public String checkout(Integer idUser, String paymentMethod, List<CartPurchaseDTO> cartItems) {
+        List<String> validMethods = List.of("CARD", "TRANSFER", "Efectivo");
         if (!validMethods.contains(paymentMethod)) {
             throw new RuntimeException("Método de pago inválido: " + paymentMethod);
         }
+
         salesRepository.checkout(idUser, paymentMethod);
-        return "Orden creada exitosamente";
+
+        if ("TRANSFER".equals(paymentMethod)) {
+            return "Orden registrada. Pendiente de validación de transferencia.";
+        }
+
+        return "Orden procesada exitosamente. Stock actualizado.";
     }
 
     public String approvePayment(Integer idPayment) {
@@ -56,23 +65,28 @@ public class SalesService {
         String status = salesRepository.getPaymentStatus(idPayment);
 
         if (status == null) {
-            throw new RuntimeException("Orden no encontrada");
+            throw new RuntimeException("Orden #" + idPayment + " no encontrada en el sistema");
         }
-        if (status.equals("CANCELLED")) {
-            throw new RuntimeException("La orden ya está cancelada");
+
+        if ("CANCELLED".equalsIgnoreCase(status)) {
+            throw new RuntimeException("La orden ya se encuentra cancelada");
         }
+
         if (!isAdmin) {
             Integer owner = salesRepository.getPaymentOwner(idPayment);
-            if (!owner.equals(idUser)) {
-                throw new RuntimeException("No tienes permiso para cancelar esta orden");
+
+            if (owner == null || !owner.equals(idUser)) {
+                throw new RuntimeException("No tienes permisos: Esta orden pertenece a otro usuario");
             }
         }
-        if (status.equals("APPROVED")) {
+
+        if ("APPROVED".equalsIgnoreCase(status)) {
             salesRepository.restoreStock(idPayment);
         }
 
-        salesRepository.cancelPayment(idPayment);
-        return "Orden cancelada exitosamente";
+        salesRepository.updateStatus(idPayment, "CANCELLED");
+
+        return "Orden #" + idPayment + " cancelada exitosamente";
     }
 
     public List<PaymentDTO> getPendingPayments() {

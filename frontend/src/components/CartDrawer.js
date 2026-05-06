@@ -1,20 +1,73 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Drawer, Box, Typography, IconButton, Button,
-  Divider, Avatar, Stack,
+  Avatar, Stack, FormControl, RadioGroup, 
+  FormControlLabel, Radio, Paper, CircularProgress,
+  Divider 
 } from "@mui/material";
 import {
   Close as CloseIcon,
   Add as AddIcon,
   Remove as RemoveIcon,
-  DeleteOutlined as DeleteIcon,
   ShoppingCartOutlined as CartIcon,
-  ArrowForward as ArrowForwardIcon,
+  CreditCard as CardIcon,
+  AccountBalance as BankIcon,
+  CheckCircleOutlined as SuccessIcon
 } from "@mui/icons-material";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
-const CartDrawer = ({ open, onClose, onNavigate }) => {
-  const { cartItems, removeFromCart, updateQuantity, totalItems, totalPrice } = useCart();
+const CartDrawer = ({ open, onClose, onNavigate, fetchProducts }) => {
+  const { cartItems, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
+  const { token, user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("CARD");
+
+  const handleCheckout = async () => {
+    if (cartItems.length === 0 || loading) return;
+
+    setLoading(true);
+    try {
+      const tokenActual = localStorage.getItem("token") || token;
+      
+      const formattedCart = cartItems.map(item => ({
+        id_product: item.id, 
+        quantity: item.quantity,
+        id_user: user?.id_user
+      }));
+
+      const response = await fetch(`http://localhost:8090/api/sales/checkout?paymentMethod=${paymentMethod}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${tokenActual}`
+        },
+        body: JSON.stringify(formattedCart)
+      });
+
+      if (response.ok) {
+        if (typeof fetchProducts === 'function') {
+            fetchProducts(); 
+        }
+
+        setShowSuccess(true);
+        clearCart();
+
+        setTimeout(() => {
+            window.location.href = "/"; 
+        }, 3000);
+
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert("Error: " + (errorData.message || "No se pudo procesar la compra"));
+      }
+    } catch (error) {
+      alert("Error de conexión con el servidor.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Drawer
@@ -25,128 +78,87 @@ const CartDrawer = ({ open, onClose, onNavigate }) => {
         sx: { width: { xs: "100vw", sm: 400 }, display: "flex", flexDirection: "column" },
       }}
     >
-      {/* Header */}
-      <Box sx={{
-        px: 2.5, py: 2, bgcolor: "#1565C0",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-      }}>
+      <Box sx={{ px: 2.5, py: 2, bgcolor: "#1565C0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <CartIcon sx={{ color: "white", fontSize: 22 }} />
           <Typography fontWeight={700} sx={{ color: "white", fontSize: "1rem" }}>
-            Carrito {totalItems > 0 && `(${totalItems})`}
+            {showSuccess ? "Confirmación" : `Mi Carrito (${totalItems})`}
           </Typography>
         </Box>
-        <IconButton onClick={onClose} aria-label="Cerrar carrito"
-          sx={{ color: "white", "&:hover": { bgcolor: "rgba(255,255,255,0.15)" } }}>
-          <CloseIcon />
-        </IconButton>
+        <IconButton onClick={onClose} sx={{ color: "white" }}><CloseIcon /></IconButton>
       </Box>
 
-      {/* Items */}
-      <Box sx={{ flex: 1, overflowY: "auto", px: 2, py: 2 }}>
-        {cartItems.length === 0 ? (
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center",
-            justifyContent: "center", height: "100%", py: 8, gap: 2 }}>
-            <CartIcon sx={{ fontSize: 64, color: "#D1DBF0" }} />
-            <Typography fontWeight={600} color="#374151" fontSize="1rem">
-              Tu carrito está vacío
-            </Typography>
-            <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ maxWidth: 220 }}>
-              Agrega productos desde el catálogo para comenzar tu pedido
-            </Typography>
-            <Button variant="outlined" onClick={onClose}
-              sx={{ mt: 1, textTransform: "none", borderColor: "#1565C0", color: "#1565C0",
-                fontWeight: 600, borderRadius: 2, "&:hover": { bgcolor: "rgba(21,101,192,0.05)" } }}>
-              Ver catálogo
-            </Button>
-          </Box>
-        ) : (
-          <Stack spacing={1.5}>
-            {cartItems.map((item) => (
-              <Box key={item.id} sx={{
-                bgcolor: "white", border: "1px solid #E3E8F0",
-                borderRadius: 2, p: 1.5, display: "flex", gap: 1.5,
-              }}>
-                <Avatar src={item.image} variant="rounded"
-                  sx={{ width: 60, height: 60, borderRadius: 1.5, flexShrink: 0 }} />
-
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography fontSize="0.8rem" fontWeight={600} color="#111827"
-                    sx={{ overflow: "hidden", textOverflow: "ellipsis",
-                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                    {item.name}
-                  </Typography>
-                  <Typography fontSize="0.72rem" color="text.secondary" sx={{ mt: 0.25 }}>
-                    SKU: {item.SKUProduct ?? "N/A"}
-                  </Typography>
-
-                  <Box sx={{ display: "flex", alignItems: "center",
-                    justifyContent: "space-between", mt: 0.75, gap: 1 }}>
-                    {/* Cantidad */}
-                    <Box sx={{ display: "flex", alignItems: "center",
-                      border: "1px solid #E3E8F0", borderRadius: 1.5, overflow: "hidden" }}>
-                      <IconButton size="small"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        sx={{ borderRadius: 0, py: 0.25, px: 0.75, "&:hover": { bgcolor: "#F0F4FF" } }}>
-                        <RemoveIcon sx={{ fontSize: 14 }} />
-                      </IconButton>
-                      <Typography sx={{ px: 1.5, fontSize: "0.82rem", fontWeight: 600, userSelect: "none" }}>
-                        {item.quantity}
-                      </Typography>
-                      <IconButton size="small"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        disabled={item.stock > 0 && item.quantity >= item.stock}
-                        sx={{ borderRadius: 0, py: 0.25, px: 0.75, "&:hover": { bgcolor: "#F0F4FF" } }}>
-                        <AddIcon sx={{ fontSize: 14 }} />
-                      </IconButton>
-                    </Box>
-
-                    <Typography fontSize="0.88rem" fontWeight={700} color="#1565C0">
-                      ${(item.price * item.quantity).toLocaleString("es-CL")}
-                    </Typography>
-
-                    <IconButton size="small" onClick={() => removeFromCart(item.id)}
-                      aria-label="Eliminar producto"
-                      sx={{ color: "#9CA3AF", "&:hover": { color: "#E53935", bgcolor: "rgba(229,57,53,0.06)" } }}>
-                      <DeleteIcon sx={{ fontSize: 18 }} />
-                    </IconButton>
-                  </Box>
-                </Box>
-              </Box>
-            ))}
-          </Stack>
-        )}
-      </Box>
-
-      {/* Footer */}
-      {cartItems.length > 0 && (
-        <Box sx={{ borderTop: "1px solid #E3E8F0", px: 2.5, py: 2.5, bgcolor: "white" }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-            <Typography fontSize="0.85rem" color="text.secondary">
-              Subtotal ({totalItems} productos)
-            </Typography>
-            <Typography fontSize="0.85rem" fontWeight={700} color="#111827">
-              ${totalPrice.toLocaleString("es-CL")}
-            </Typography>
-          </Box>
-          <Divider sx={{ mb: 2, borderColor: "#E3E8F0" }} />
-
-          <Button fullWidth variant="outlined" endIcon={<ArrowForwardIcon />}
-            onClick={() => { onClose(); onNavigate("cart"); }}
-            sx={{ mb: 1.5, textTransform: "none", fontWeight: 600, fontSize: "0.88rem",
-              borderColor: "#1565C0", color: "#1565C0", borderRadius: 2, py: 1,
-              "&:hover": { bgcolor: "rgba(21,101,192,0.05)" } }}>
-            Ver carrito completo
-          </Button>
-
-          <Button fullWidth variant="contained"
-            onClick={() => { onClose(); onNavigate("checkout"); }}
-            sx={{ bgcolor: "#1565C0", textTransform: "none", fontWeight: 700,
-              fontSize: "0.88rem", borderRadius: 2, py: 1, boxShadow: "none",
-              "&:hover": { bgcolor: "#0D47A1", boxShadow: "none" } }}>
-            Proceder al pago
-          </Button>
+      {showSuccess ? (
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", p: 4, textAlign: "center" }}>
+          <SuccessIcon sx={{ fontSize: 80, color: "#2E7D32", mb: 2 }} />
+          <Typography variant="h5" fontWeight={700} color="#2E7D32" gutterBottom>
+            {paymentMethod === "TRANSFER" ? "Pedido Recibido" : "¡Compra Exitosa!"}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+            {paymentMethod === "TRANSFER" 
+              ? "Tu pedido está pendiente de validación por el administrador."
+              : "El stock ha sido actualizado. Gracias por tu compra."}
+          </Typography>
+          <CircularProgress size={24} sx={{ mb: 1, color: "#2E7D32" }} />
+          <Typography variant="caption" color="text.secondary">
+            Sincronizando con el servidor...
+          </Typography>
         </Box>
+      ) : (
+        <>
+          <Box sx={{ flex: 1, overflowY: "auto", px: 2, py: 2 }}>
+            {cartItems.length === 0 ? (
+              <Typography textAlign="center" sx={{ mt: 10, color: "text.secondary" }}>Tu carrito está vacío</Typography>
+            ) : (
+              <Stack spacing={2}>
+                {cartItems.map((item) => (
+                  <Box key={item.id} sx={{ bgcolor: "white", border: "1px solid #E3E8F0", borderRadius: 2, p: 1.5, display: "flex", gap: 1.5 }}>
+                    <Avatar src={item.image} variant="rounded" sx={{ width: 60, height: 60 }} />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography fontSize="0.85rem" fontWeight={600} noWrap>{item.name}</Typography>
+                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 1 }}>
+                        <Typography fontSize="0.9rem" fontWeight={700} color="#1565C0">
+                            ${(item.price * item.quantity).toLocaleString("es-CL")}
+                        </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center", border: "1px solid #E3E8F0", borderRadius: 1 }}>
+                            <IconButton size="small" onClick={() => updateQuantity(item.id, item.quantity - 1)}><RemoveIcon sx={{ fontSize: 14 }} /></IconButton>
+                            <Typography sx={{ px: 1, fontSize: "0.8rem" }}>{item.quantity}</Typography>
+                            <IconButton size="small" onClick={() => updateQuantity(item.id, item.quantity + 1)}><AddIcon sx={{ fontSize: 14 }} /></IconButton>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
+                ))}
+              </Stack>
+            )}
+          </Box>
+
+          {cartItems.length > 0 && (
+            <Box sx={{ p: 2.5, bgcolor: "#F8FAFC", borderTop: "1px solid #E3E8F0" }}>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>Método de Pago:</Typography>
+              <RadioGroup value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                <FormControlLabel value="CARD" control={<Radio size="small" />} label="Tarjeta (Instantáneo)" />
+                <FormControlLabel value="TRANSFER" control={<Radio size="small" />} label="Transferencia (Pendiente)" />
+              </RadioGroup>
+              
+              <Divider sx={{ my: 2 }} />
+              
+              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+                <Typography fontWeight={600}>Total:</Typography>
+                <Typography fontWeight={800} color="#1565C0">${totalPrice.toLocaleString("es-CL")}</Typography>
+              </Box>
+              <Button 
+                fullWidth 
+                variant="contained" 
+                disabled={loading} 
+                onClick={handleCheckout}
+                sx={{ py: 1.5, fontWeight: 700 }}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : "FINALIZAR PEDIDO"}
+              </Button>
+            </Box>
+          )}
+        </>
       )}
     </Drawer>
   );

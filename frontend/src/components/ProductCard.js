@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import {
   Card, CardMedia, CardContent, CardActions,
-  Typography, Button, Box,
+  Typography, Button, Box, IconButton, Tooltip
 } from "@mui/material";
-import { AddShoppingCart as AddShoppingCartIcon } from "@mui/icons-material";
+import { 
+  AddShoppingCart as AddShoppingCartIcon,
+  DeleteForever as DeleteIcon 
+} from "@mui/icons-material";
 import ProductDetailModal from "./ProductDetailModal.js";
 
 const ProductCard = ({ product }) => {
   const [open, setOpen] = useState(false);
+
+  const userRole = localStorage.getItem("role"); // "ADMIN" o "USER"
+  const isAdmin = userRole === "ADMIN";
 
   const name  = product.productName  || "Producto sin nombre";
   const price = Number(product.productPrice ?? 0);
@@ -15,12 +21,39 @@ const ProductCard = ({ product }) => {
   const imageUrl = product.image ||
     `https://picsum.photos/seed/product-${product.id_product}/400/300`;
 
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    
+    if (window.confirm(`¿Estás seguro de que deseas eliminar "${name}"?`)) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:8090/api/products/${product.id_product}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          alert("Producto eliminado exitosamente");
+          window.location.reload(); 
+        } else {
+          alert("Error al eliminar el producto. Verifica los permisos.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("No se pudo conectar con el servidor.");
+      }
+    }
+  };
+
   return (
     <>
       <Card
         elevation={0}
         onClick={() => setOpen(true)}
         sx={{
+          position: "relative",
           border: "1px solid #E3E8F0", borderRadius: 3,
           height: "100%", display: "flex", flexDirection: "column",
           cursor: "pointer",
@@ -32,6 +65,28 @@ const ProductCard = ({ product }) => {
           },
         }}
       >
+        {/* 3. BOTÓN DE ELIMINAR (Solo visible para ADMIN) */}
+        {isAdmin && (
+          <Tooltip title="Eliminar Producto">
+            <IconButton
+              onClick={handleDelete}
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                bgcolor: "rgba(255, 255, 255, 0.9)",
+                color: "#d32f2f",
+                boxShadow: 2,
+                zIndex: 10,
+                "&:hover": { bgcolor: "#fdecea", color: "#b71c1c" },
+              }}
+              size="small"
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+
         <CardMedia
           component="img"
           height="160"

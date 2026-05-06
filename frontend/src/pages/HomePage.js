@@ -3,7 +3,7 @@ import { Box, Container } from "@mui/material";
 import FeaturedCategories from "../components/FeaturedCategories";
 import ProductGrid        from "../components/ProductGrid";
 
-const HomePage = ({ onNavigate, searchValue, onSearchChange }) => {
+const HomePage = ({ onNavigate, searchValue, onSearchChange, refreshSignal }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleCategorySelect = (cat) => {
@@ -20,6 +20,7 @@ const HomePage = ({ onNavigate, searchValue, onSearchChange }) => {
         <ProductGrid
           categoryId={selectedCategory?.id_category ?? null}
           searchValue={searchValue}
+          refreshSignal={refreshSignal} 
         />
       </Container>
     </Box>

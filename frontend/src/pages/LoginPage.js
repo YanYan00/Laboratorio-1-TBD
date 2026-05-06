@@ -20,6 +20,19 @@ const fieldSx = {
   "& .MuiFormHelperText-root": { fontSize: "0.72rem", mx: 0, mt: 0.5 },
 };
 
+const parseJwt = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+};
+
 const LoginPage = ({ onNavigate }) => {
   const { login } = useAuth();
 
@@ -57,15 +70,36 @@ const LoginPage = ({ onNavigate }) => {
       identifier: validators.identifier(form.identifier),
       password:   validators.password(form.password),
     });
+    
     if (!isValid()) return;
 
     setLoading(true);
     setApiError("");
+    
     try {
       const token = await loginUser(form.identifier, form.password);
-      login(token);
-      onNavigate("buyer");
+      
+      if (token) {
+        localStorage.setItem("token", token); 
+        
+        const decoded = parseJwt(token);
+        const userRole = decoded?.role || "USER";
+        
+        localStorage.setItem("role", userRole);
+        
+        login(token); 
+        
+        if (userRole === "ADMIN") {
+          onNavigate("pending-payments");
+        } else {
+          onNavigate("home");
+        }
+      } else {
+        throw new Error("No se recibió un token válido.");
+      }
+
     } catch (err) {
+      console.error("Error en login:", err);
       setApiError(err.message || "Credenciales incorrectas. Intenta nuevamente.");
     } finally {
       setLoading(false);
@@ -120,20 +154,18 @@ const LoginPage = ({ onNavigate }) => {
                 <TextField
                   fullWidth size="small"
                   name="identifier"
-                  placeholder="ej: empresa_chile o contacto@empresa.cl"
+                  placeholder="ej: usuario_nex o contacto@mail.cl"
                   value={form.identifier}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={touched.identifier && Boolean(errors.identifier)}
                   helperText={touched.identifier && errors.identifier}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <UsernameIcon sx={{ fontSize: 18, color: touched.identifier && errors.identifier ? "#d32f2f" : "#9CA3AF" }} />
-                        </InputAdornment>
-                      ),
-                    },
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <UsernameIcon sx={{ fontSize: 18, color: touched.identifier && errors.identifier ? "#d32f2f" : "#9CA3AF" }} />
+                      </InputAdornment>
+                    ),
                   }}
                   sx={fieldSx}
                 />
@@ -155,23 +187,19 @@ const LoginPage = ({ onNavigate }) => {
                   onBlur={handleBlur}
                   error={touched.password && Boolean(errors.password)}
                   helperText={touched.password && errors.password}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LockIcon sx={{ fontSize: 18, color: touched.password && errors.password ? "#d32f2f" : "#9CA3AF" }} />
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton size="small" onClick={() => setShowPwd(!showPwd)} edge="end">
-                            {showPwd
-                              ? <VisibilityOff sx={{ fontSize: 18 }} />
-                              : <Visibility    sx={{ fontSize: 18 }} />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockIcon sx={{ fontSize: 18, color: touched.password && errors.password ? "#d32f2f" : "#9CA3AF" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton size="small" onClick={() => setShowPwd(!showPwd)} edge="end">
+                          {showPwd ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
                   }}
                   sx={fieldSx}
                 />

@@ -21,29 +21,36 @@ export const CartProvider = ({ children }) => {
     id_category: product.id_category ?? null,
   });
 
-  const addToCart = (product, quantity = 1) => {
-    const normalized = normalizeProduct(product);
-    const qty = Math.max(1, Number(quantity) || 1);
-
-    setCartItems((prev) => {
-      const existing = prev.find((i) => i.id === normalized.id);
-
-      if (existing) {
-        const nextQty = Math.min(existing.quantity + qty, existing.stock || Infinity);
-        return prev.map((i) =>
-          i.id === normalized.id ? { ...i, quantity: nextQty } : i
-        );
-      }
-
-      return [
-        ...prev,
-        {
-          ...normalized,
-          quantity: Math.min(qty, normalized.stock || qty),
-        },
-      ];
+const addToCart = async (product, quantity = 1) => {
+  const normalized = normalizeProduct(product);
+  const qty = Math.max(1, Number(quantity) || 1);
+  try {
+    const token = localStorage.getItem("token");
+    console.log("Enviando token:", token);
+    await fetch("http://localhost:8090/api/cart/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        id_product: normalized.id,
+        quantity: qty
+      })
     });
-  };
+  } catch (error) {
+    console.error("Error al sincronizar el carrito con la DB:", error);
+  }
+
+  setCartItems((prev) => {
+    const existing = prev.find((i) => i.id === normalized.id);
+    if (existing) {
+      const nextQty = Math.min(existing.quantity + qty, existing.stock || Infinity);
+      return prev.map((i) => i.id === normalized.id ? { ...i, quantity: nextQty } : i);
+    }
+    return [...prev, { ...normalized, quantity: Math.min(qty, normalized.stock || qty) }];
+  });
+};
 
   const removeFromCart = (id) =>
     setCartItems((prev) => prev.filter((i) => i.id !== id));

@@ -8,9 +8,10 @@ import {
   ReceiptLongOutlined as ReceiptIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
+  CancelOutlined as CancelIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthContext";
-import { getMyOrders, getPurchaseDetail } from "../../services/salesService";
+import { getMyOrders, getPurchaseDetail, cancelOrder } from "../../services/salesService";
 
 const STATUS_MAP = {
   PENDING:   { label: "Pendiente",  color: "warning" },
@@ -80,17 +81,36 @@ const BuyerOrders = () => {
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState("");
   const [expanded, setExpanded] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false); 
 
-  useEffect(() => {
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+  const fetchOrders = () => {
+    setLoading(true);
     getMyOrders(token)
       .then(setOrders)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (token) fetchOrders();
+    else setLoading(false);
   }, [token]);
+
+  const handleCancel = async (idPayment) => {
+    if (!window.confirm("¿Estás seguro de que deseas cancelar este pedido?")) return;
+
+    setActionLoading(true);
+    try {
+
+      await cancelOrder(idPayment, token);
+      alert("Pedido cancelado exitosamente.");
+      fetchOrders();
+    } catch (err) {
+      alert("Error al cancelar: " + err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   if (loading) return (
     <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 320 }}>
@@ -124,6 +144,7 @@ const BuyerOrders = () => {
         {orders.map((order) => {
           const status     = STATUS_MAP[order.status] ?? { label: order.status, color: "default" };
           const isExpanded = expanded === order.idPayment;
+          const canCancel  = order.status === "PENDING"; 
 
           return (
             <Paper key={order.idPayment} elevation={0} sx={{
@@ -154,7 +175,22 @@ const BuyerOrders = () => {
 
               <Divider sx={{ my: 1.5, borderColor: "#F3F4F6" }} />
 
-              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                {/* BOTÓN DE CANCELAR */}
+                {canCancel && (
+                  <Button
+                    size="small"
+                    variant="text"
+                    color="error"
+                    startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : <CancelIcon />}
+                    onClick={() => handleCancel(order.idPayment)}
+                    disabled={actionLoading}
+                    sx={{ textTransform: "none", fontSize: "0.8rem", fontWeight: 600 }}
+                  >
+                    Cancelar pedido
+                  </Button>
+                )}
+
                 <Button size="small" variant="outlined"
                   endIcon={isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                   onClick={() => setExpanded(isExpanded ? null : order.idPayment)}

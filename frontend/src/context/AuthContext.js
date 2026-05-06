@@ -1,34 +1,44 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext(null);
 
-// Decodifica el payload del JWT sin librería externa
 const decodeJwt = (token) => {
   try {
     const payload = token.split(".")[1];
     return JSON.parse(atob(payload));
   } catch {
-    return {};
+    return null;
   }
 };
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser]   = useState(null);
 
+  useEffect(() => {
+    if (token) {
+      const payload = decodeJwt(token);
+      if (payload) {
+        setUser({
+          username: payload.sub,
+          email:    payload.email,
+          role:     payload.role,
+          id_user:  payload.id_user,
+          id_auth:  payload.id_auth,
+        });
+      } else {
+        logout();
+      }
+    }
+  }, [token]);
+
   const login = (jwtToken) => {
-    const payload = decodeJwt(jwtToken);
+    localStorage.setItem("token", jwtToken); 
     setToken(jwtToken);
-    setUser({
-      username: payload.sub,
-      email:    payload.email,
-      role:     payload.role,
-      id_user:  payload.id_user,
-      id_auth:  payload.id_auth,
-    });
   };
 
   const logout = () => {
+    localStorage.removeItem("token"); 
     setToken(null);
     setUser(null);
   };

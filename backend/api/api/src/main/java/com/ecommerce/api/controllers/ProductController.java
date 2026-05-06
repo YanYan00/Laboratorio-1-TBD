@@ -2,19 +2,16 @@ package com.ecommerce.api.controllers;
 
 import java.util.List;
 
+import com.ecommerce.api.dto.DiscountDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import com.ecommerce.api.dto.ProductDTO;
 import com.ecommerce.api.models.Product;
 import com.ecommerce.api.repositories.ProductRepository;
 import com.ecommerce.api.services.ProductService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/products")
@@ -31,6 +28,7 @@ public class ProductController {
     }
 
     @PostMapping("/publish")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<?> publishAProduct(@RequestBody ProductDTO productToPublish) {
         String response = productService.publishProduct(productToPublish);
         if (response.contains("Error")) {
@@ -54,5 +52,26 @@ public class ProductController {
                 : productRepository.findAll();
 
         return ResponseEntity.ok(products);
+    }
+
+    @PostMapping("/apply-discount") //
+    public ResponseEntity<?> applyMassiveDiscount(@RequestBody DiscountDTO discountDTO) {
+        try {
+            productService.applyCategoryDiscount(discountDTO.getIdCategory(), (int) discountDTO.getPercent());
+            return ResponseEntity.ok("Descuento aplicado con éxito");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al procesar el descuento: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+        try {
+            productService.deleteProduct(id);
+            return ResponseEntity.ok("Producto eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al eliminar: " + e.getMessage());
+        }
     }
 }

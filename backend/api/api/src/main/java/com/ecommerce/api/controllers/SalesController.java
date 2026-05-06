@@ -1,6 +1,7 @@
 package com.ecommerce.api.controllers;
 
 import com.ecommerce.api.config.JwtUtils;
+import com.ecommerce.api.dto.CartPurchaseDTO;
 import com.ecommerce.api.dto.PurchaseDetailDTO;
 import com.ecommerce.api.dto.SalesDTO;
 import com.ecommerce.api.repositories.SalesRepository;
@@ -33,28 +34,31 @@ public class SalesController {
     }
 
     @GetMapping("/my-sales")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     public List<SalesDTO> mySales(){
         return salesService.getMySales();
     }
 
     @PostMapping("/checkout")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<?> checkout(
             @RequestParam String paymentMethod,
+            @RequestBody List<CartPurchaseDTO> cartItems,
             HttpServletRequest httpRequest) {
+
         Integer idUser = jwtUtils.extractIdUser(httpRequest);
-        return ResponseEntity.ok(salesService.checkout(idUser, paymentMethod));
+
+        return ResponseEntity.ok(salesService.checkout(idUser, paymentMethod, cartItems));
     }
 
     @PatchMapping("/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> approvePayment(@PathVariable Integer id) {
         return ResponseEntity.ok(salesService.approvePayment(id));
     }
 
     @PatchMapping("/{id}/cancel")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<?> cancelPayment(@PathVariable Integer id, HttpServletRequest httpRequest) {
         Integer idUser  = jwtUtils.extractIdUser(httpRequest);
         boolean isAdmin = jwtUtils.hasRole(httpRequest, "ADMIN");
@@ -62,27 +66,28 @@ public class SalesController {
     }
 
     @GetMapping("/pending")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> getPendingPayments() {
         return ResponseEntity.ok(salesService.getPendingPayments());
     }
 
     @GetMapping("/my-orders")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<?> getMyOrders(HttpServletRequest httpRequest) {
         Integer idUser = jwtUtils.extractIdUser(httpRequest);
         return ResponseEntity.ok(salesService.getMyPayments(idUser));
     }
 
-    @GetMapping("/id_payment/purchase")
+    @GetMapping("/{id_payment}/purchase")
+    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<?> getPurchaseHistory(@PathVariable Integer id_payment) {
 
         List<PurchaseDetailDTO> invoiceDetails = salesRepository.getInvoiceDetails(id_payment);
-        
+
         if(invoiceDetails.isEmpty()) {
             return ResponseEntity.badRequest().body("Factura no encontrada o sin detalles");
         }
-        
+
         return ResponseEntity.ok(invoiceDetails);
     }
 }

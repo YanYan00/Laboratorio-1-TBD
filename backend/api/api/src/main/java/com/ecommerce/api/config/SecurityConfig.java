@@ -2,6 +2,7 @@ package com.ecommerce.api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,8 +26,25 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/products/**").permitAll()
-                        .requestMatchers("/api/categories/**").permitAll() // 👈 categorías públicas
+
+                        .requestMatchers(HttpMethod.POST, "/api/products/publish").hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/{id}").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers("/api/categories/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/sales/pending").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/sales/*/approve").hasAuthority("ADMIN")
+
+                        .requestMatchers("/api/sales/checkout").hasAuthority("USER")
+                        .requestMatchers("/api/sales/my-orders").hasAuthority("USER")
+                        .requestMatchers("/api/cart/add").hasAuthority("USER")
+
+                        .requestMatchers(HttpMethod.PATCH, "/api/sales/*/cancel").hasAnyAuthority("USER", "ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/sales/*/purchase").hasAnyAuthority("USER", "ADMIN")
+
+                        .requestMatchers("/api/sales/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
