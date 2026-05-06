@@ -174,7 +174,11 @@ GROUP BY
     c.Category_name
 
 order by month, total_sales_amount DESC;
-
+-- Index
+CREATE INDEX index_products_sku ON products(SKU_product);
+CREATE INDEX index_payments_user ON payments(id_user);
+CREATE INDEX index_products_name ON  products(product_name);
+CREATE INDEX index_products_description ON products(product_description);
 -- Procedure
 CREATE OR REPLACE PROCEDURE checkout_cart(
     p_id_user        INT,
