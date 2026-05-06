@@ -10,14 +10,14 @@ DROP TABLE IF EXISTS auth_user CASCADE;
 DROP TABLE IF EXISTS roles CASCADE;
 -- 1. Tabla de Roles (necesaria primero para la clave for�nea en User)
 CREATE TABLE IF NOT EXISTS roles (
-                                     id_role SERIAL PRIMARY KEY,
-                                     name_role VARCHAR(255) NOT NULL UNIQUE
+id_role SERIAL PRIMARY KEY,
+name_role VARCHAR(255) NOT NULL UNIQUE
     );
 
 -- 2. Tabla de Autenticaci�n (Relaci�n 1:1 con User)
 CREATE TABLE IF NOT EXISTS auth_user (
-                                         id_auth SERIAL PRIMARY KEY,
-                                         username VARCHAR(30) NOT NULL UNIQUE,
+    id_auth SERIAL PRIMARY KEY,
+    username VARCHAR(30) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     id_role INTEGER NOT NULL,
@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS auth_user (
     );
 -- 3. Tabla de Usuarios
 CREATE TABLE IF NOT EXISTS users (
-                                     id_user SERIAL PRIMARY KEY,
-                                     name_user VARCHAR(255) NOT NULL,
+    id_user SERIAL PRIMARY KEY,
+    name_user VARCHAR(255) NOT NULL,
     rut VARCHAR(25) NOT NULL UNIQUE,
     address VARCHAR(255) NOT NULL,
     phone VARCHAR(255) NOT NULL,
@@ -36,17 +36,17 @@ CREATE TABLE IF NOT EXISTS users (
     );
 -- 5. Tabla de Categor�as
 CREATE TABLE IF NOT EXISTS categories (
-                                          id_category SERIAL PRIMARY KEY,
-                                          category_name VARCHAR(30) NOT NULL,
+    id_category SERIAL PRIMARY KEY,
+    category_name VARCHAR(30) NOT NULL,
     category_description VARCHAR(125) NOT NULL
     );
 -- 4. Tabla de Productos
 CREATE TABLE IF NOT EXISTS products (
-                                        id_product SERIAL PRIMARY KEY,
-                                        id_category INTEGER NOT NULL,
-                                        id_user INTEGER NOT NULL,
-                                        SKU_product INTEGER NOT NULL,
-                                        product_name VARCHAR(30) NOT NULL,
+    id_product SERIAL PRIMARY KEY,
+    id_category INTEGER NOT NULL,
+    id_user INTEGER NOT NULL,
+    SKU_product INTEGER NOT NULL,
+    product_name VARCHAR(30) NOT NULL,
     product_description VARCHAR(125) NOT NULL,
     product_price DOUBLE PRECISION NOT NULL,
     original_price DOUBLE PRECISION DEFAULT NULL,
@@ -58,51 +58,51 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- 6. Tabla de Carrito de Compras
 CREATE TABLE IF NOT EXISTS shopping_cart (
-                                             id_shopping_cart SERIAL PRIMARY KEY,
-                                             id_user INTEGER NOT NULL,
-                                             FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE
+    id_shopping_cart SERIAL PRIMARY KEY,
+    id_user INTEGER NOT NULL,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE
     );
 
 -- 7. Tabla de Detalle de Carrito
 CREATE TABLE IF NOT EXISTS cart_detail (
-                                           id_detail SERIAL PRIMARY KEY,
-                                           id_shopping_cart INTEGER NOT NULL,
-                                           id_product INTEGER NOT NULL,
-                                           quantity DOUBLE PRECISION,
-                                           FOREIGN KEY (id_shopping_cart) REFERENCES shopping_cart(id_shopping_cart),
+    id_detail SERIAL PRIMARY KEY,
+    id_shopping_cart INTEGER NOT NULL,
+    id_product INTEGER NOT NULL,
+    quantity DOUBLE PRECISION,
+    FOREIGN KEY (id_shopping_cart) REFERENCES shopping_cart(id_shopping_cart),
     FOREIGN KEY (id_product) REFERENCES products(id_product)
 
     );
 
 -- 8. Tabla de Historial de Stock
 CREATE TABLE IF NOT EXISTS historial_stock (
-                                               id_historial SERIAL PRIMARY KEY,
-                                               id_user INTEGER NOT NULL,
-                                               id_product INTEGER NOT NULL,
-                                               amount_modificated DOUBLE PRECISION NOT NULL,
-                                               FOREIGN KEY (id_product) REFERENCES products(id_product),
+    id_historial SERIAL PRIMARY KEY,
+    id_user INTEGER NOT NULL,
+    id_product INTEGER NOT NULL,
+    amount_modificated DOUBLE PRECISION NOT NULL,
+    FOREIGN KEY (id_product) REFERENCES products(id_product),
     FOREIGN KEY (id_user) REFERENCES users(id_user)
 
     );
 -- STATUS = 'PENDING' | 'APPROVED' | 'CANCELLED'
 CREATE TABLE IF NOT EXISTS payments (
-                                        id_payment SERIAL PRIMARY KEY,
-                                        id_user INTEGER NOT NULL,
-                                        total DOUBLE PRECISION NOT NULL,
-                                        payment_date TIMESTAMP NOT NULL DEFAULT NOW(),
+    id_payment SERIAL PRIMARY KEY,
+    id_user INTEGER NOT NULL,
+    total DOUBLE PRECISION NOT NULL,
+    payment_date TIMESTAMP NOT NULL DEFAULT NOW(),
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     payment_method  VARCHAR(20) NOT NULL DEFAULT 'CARD',
     FOREIGN KEY (id_user) REFERENCES users(id_user)
     );
 
 CREATE TABLE IF NOT EXISTS detail_payment (
-                                              id_detail_payment SERIAL PRIMARY KEY,
-                                              id_payment INTEGER NOT NULL,
-                                              id_product INTEGER NOT NULL,
-                                              quantity DOUBLE PRECISION NOT NULL,
-                                              unit_price DOUBLE PRECISION NOT NULL,
-                                              subtotal DOUBLE PRECISION NOT NULL,
-                                              FOREIGN KEY (id_payment) REFERENCES payments(id_payment),
+    id_detail_payment SERIAL PRIMARY KEY,
+    id_payment INTEGER NOT NULL,
+    id_product INTEGER NOT NULL,
+    quantity DOUBLE PRECISION NOT NULL,
+    unit_price DOUBLE PRECISION NOT NULL,
+    subtotal DOUBLE PRECISION NOT NULL,
+    FOREIGN KEY (id_payment) REFERENCES payments(id_payment),
     FOREIGN KEY (id_product) REFERENCES products(id_product)
     );
 
