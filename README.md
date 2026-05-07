@@ -86,7 +86,8 @@ psql -U postgres -d nombre_db -f dbCreate.sql
 ```
 Con esto la BD queda creada y configurada
 
-*** Endpoints *** 
+***Endpoints***
+
 //Auth
 POST http://localhost:8090/api/auth/register
 {
