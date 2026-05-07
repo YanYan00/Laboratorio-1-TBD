@@ -55,8 +55,6 @@ public class RoleRepository {
         return jdbcTemplate.update(sql,id);
     }
 
-    //update
-    // it's not necessary
 
 
 }
