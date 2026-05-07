@@ -68,10 +68,24 @@ npm start
 ```
 ya tienes la aplicacion corriendo.
 
+***Configuracion y Creacion de la Base de Datos***
 
+Para la creacion de la BD, lo primero que se debe tener en las variables de entornola de PostgreSQL
+Se debe ingresar el siguiente comando
+```bash
+bash:
 
-*** Endpoints ***
+psql -U postgres -c "CREATE DATABASE \"nombre_db\";"
+```
+Este comando solicitara la contraseña del usuario de PostgreSQL
+Luego situandonos en la raiz del proyecto(Carpeta donde esta el dbCreate.sql), ingresar el siguiente comando para la construccion de la BD:
+```bash
+bash:
 
+psql -U postgres -d nombre_db -f dbCreate.sql
+```
+
+*** Endpoints *** 
 //Auth
 POST http://localhost:8090/api/auth/register
 {
