@@ -84,6 +84,7 @@ bash:
 
 psql -U postgres -d nombre_db -f dbCreate.sql
 ```
+Con esto la BD queda creada y configurada
 
 *** Endpoints *** 
 //Auth
